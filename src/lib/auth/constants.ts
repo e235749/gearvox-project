@@ -1,0 +1,14 @@
+export const AUTH_ROUTES = {
+  login: "/login",
+  signup: "/signup",
+  callback: "/auth/callback",
+  home: "/",
+} as const;
+
+export const PUBLIC_ROUTES = [
+  AUTH_ROUTES.login,
+  AUTH_ROUTES.signup,
+  AUTH_ROUTES.callback,
+] as const;
+
+export const MIN_PASSWORD_LENGTH = 8;

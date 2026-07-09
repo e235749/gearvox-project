@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GearVox
 
-## Getting Started
+キャンパー向けSNS型レビューアプリ（卒業研究プロジェクト）
 
-First, run the development server:
+## 技術スタック
+
+- **フロントエンド**: Next.js 16（App Router）/ TypeScript / Tailwind CSS v4
+- **認証・DB・Storage**: Supabase
+- **状態管理**: Zustand（コンテキストアンケート）
+- **アイコン**: Tabler Icons
+- **デプロイ**: Vercel
+
+## セットアップ
+
+### 1. 依存関係のインストール
+
+```bash
+npm install
+```
+
+### 2. 環境変数
+
+`.env.local.example` をコピーして `.env.local` を作成し、Supabase プロジェクトの値を設定します。
+
+```bash
+cp .env.local.example .env.local
+```
+
+| 変数 | 説明 |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase プロジェクト URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `NEXT_PUBLIC_SITE_URL` | アプリの公開 URL（OAuth リダイレクト用。本番は Vercel の URL） |
+
+### 3. Supabase Auth 設定
+
+Supabase ダッシュボードで以下を設定してください。
+
+1. **Authentication → URL Configuration**
+   - Site URL: `http://localhost:3000`（本番は Vercel の URL）
+   - Redirect URLs: `http://localhost:3000/auth/callback`（本番 URL も追加）
+
+2. **Authentication → Providers**
+   - Google / Apple を有効化（各プロバイダーの Client ID 等を設定）
+   - Email プロバイダーを有効化
+
+3. **Authentication → Settings**
+   - 「同一メールアドレスのアカウント自動統合（Automatic linking）」を有効化
+
+### 4. Supabase マイグレーション
+
+Supabase CLI でローカル開発する場合:
+
+```bash
+npx supabase start
+npx supabase db reset
+```
+
+リモートプロジェクトへ適用する場合:
+
+```bash
+npx supabase link --project-ref <your-project-ref>
+npx supabase db push
+```
+
+マイグレーションファイルは `supabase/migrations/` にあります。
+
+### 5. 開発サーバー起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 で確認できます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## プロジェクト構成
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── (auth)/          # ログイン・会員登録（ボトムナビなし）
+│   ├── (main)/          # メイン画面（ボトムナビあり）
+│   └── layout.tsx
+├── components/          # UIコンポーネント（今後追加）
+├── constants/           # コンテキストアンケート選択肢など
+├── hooks/               # カスタムフック（今後追加）
+├── lib/
+│   ├── auth/            # 認証ロジック（Server Actions・OAuth）
+│   ├── context/         # コンテキスト回答のビジネスロジック
+│   └── supabase/        # Supabaseクライアント（UIから分離）
+├── stores/              # Zustandストア
+└── types/               # TypeScript型定義
+```
 
-## Learn More
+## 実装状況
 
-To learn more about Next.js, take a look at the following resources:
+| ステップ | 内容 | 状態 |
+|---|---|---|
+| 1 | Supabase テーブル・RLS・Storage | ✅ マイグレーション作成済み |
+| 2 | Next.js プロジェクト構成 | ✅ 完了 |
+| 3 | 認証（Google/Apple/メール） | ✅ 完了 |
+| 4 | コア画面の実装 | ⬜ プレースホルダーのみ |
+| 5 | コンテキストアンケート | ⬜ ストアのみ |
+| 6 | 類似度スコアのバッチ処理 | ⬜ 未着手 |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## デザイン方針
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 背景: `#1a1a18`
+- アクセント: `#c8a96e`
+- ボトムタブ: ホーム / 検索 / 投稿（FAB）/ 通知 / マイページ
 
-## Deploy on Vercel
+## 開発ルール
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- TypeScript の `any` 禁止
+- Supabase ロジックは `src/lib/supabase/` に集約（UIコンポーネントへ直書きしない）
+- 関数は単一責任・30行超えたら分割を検討
+- 外部入力は必ずバリデーションまたは Null チェック
