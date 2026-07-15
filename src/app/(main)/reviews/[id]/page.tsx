@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { getReviewById } from "@/lib/reviews/get-review";
 import { getReviewImagePublicUrl } from "@/lib/reviews/upload-review-images";
 
 interface ReviewDetailPageProps {
   params: Promise<{ id: string }>;
-}
-
-function formatGearLabel(name: string, brand: string | null): string {
-  if (brand) {
-    return `${brand} / ${name}`;
-  }
-  return name;
 }
 
 export const dynamic = "force-dynamic";
@@ -27,12 +21,14 @@ export default async function ReviewDetailPage({
     notFound();
   }
 
+  const gearLabel = formatGearLabel(review.gear.name, review.gear.brand);
+
   return (
     <section className="space-y-6">
       <header className="space-y-2">
         <p className="text-sm text-muted">レビュー詳細</p>
         <h1 className="text-2xl font-semibold tracking-tight">
-          {review.title ?? formatGearLabel(review.gear.name, review.gear.brand)}
+          {review.title ?? gearLabel}
         </h1>
         <p className="text-sm text-muted">
           {review.author.display_name} ・ {review.rating} / 5
@@ -41,9 +37,12 @@ export default async function ReviewDetailPage({
 
       <div className="rounded-lg border border-border bg-surface p-4 text-sm">
         <p className="text-muted">対象ギア</p>
-        <p className="font-medium">
-          {formatGearLabel(review.gear.name, review.gear.brand)}
-        </p>
+        <Link
+          href={`/gears/${review.gear.id}`}
+          className="font-medium text-accent hover:underline"
+        >
+          {gearLabel}
+        </Link>
       </div>
 
       <article className="space-y-3">

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { filterGearsByKeyword } from "@/lib/gears/filter-gears";
 import type { GearListItem } from "@/lib/gears/types";
 
@@ -9,13 +10,6 @@ interface GearSelectorProps {
   gears: GearListItem[];
   selectedGearId: string | null;
   onSelect: (gearId: string) => void;
-}
-
-function formatGearLabel(gear: GearListItem): string {
-  if (gear.brand) {
-    return `${gear.brand} / ${gear.name}`;
-  }
-  return gear.name;
 }
 
 export function GearSelector({
@@ -60,7 +54,9 @@ export function GearSelector({
       {selectedGear ? (
         <div className="rounded-lg border border-accent/50 bg-accent/10 px-4 py-3 text-sm">
           <p className="text-muted">選択中</p>
-          <p className="font-medium">{formatGearLabel(selectedGear)}</p>
+          <p className="font-medium">
+            {formatGearLabel(selectedGear.name, selectedGear.brand)}
+          </p>
         </div>
       ) : (
         <p className="text-sm text-muted">レビューするギアを選択してください。</p>
