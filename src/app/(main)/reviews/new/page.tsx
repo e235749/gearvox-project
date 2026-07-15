@@ -1,8 +1,18 @@
-export default function NewReviewPage() {
+import { NewReviewForm } from "@/components/reviews/new-review-form";
+import { listGears } from "@/lib/gears/list-gears";
+
+export const dynamic = "force-dynamic";
+
+export default async function NewReviewPage() {
+  const gears = await listGears();
+
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">レビュー投稿</h1>
-      <p className="text-sm text-muted">ギアレビューの投稿フォーム（未実装）</p>
+    <section className="space-y-6">
+      <header>
+        <p className="text-sm text-muted">投稿</p>
+        <h1 className="text-2xl font-semibold tracking-tight">レビュー投稿</h1>
+      </header>
+      <NewReviewForm gears={gears} />
     </section>
   );
 }
