@@ -9,6 +9,7 @@ import {
   parseUpdateProfileForm,
   validateUpdateProfileInput,
 } from "@/lib/users/validation";
+import { normalizeInstagramUsername } from "@/lib/users/format-instagram-username";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -74,6 +75,7 @@ export async function updateProfile(
     display_name: input.displayName,
     bio: input.bio || null,
     location: input.location || null,
+    instagram_username: normalizeInstagramUsername(input.instagramUsername),
     is_public: input.isPublic,
     avatar_url: avatarUrl,
   };

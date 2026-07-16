@@ -24,3 +24,19 @@ export type ReviewDetail = {
     display_order: number;
   }>;
 };
+
+export type FeedReviewListItem = {
+  id: string;
+  title: string | null;
+  body: string;
+  rating: number;
+  created_at: string;
+  author: {
+    display_name: string;
+  };
+  gear: {
+    id: string;
+    name: string;
+    brand: string | null;
+  };
+};

@@ -2,6 +2,10 @@ import Link from "next/link";
 
 import { signOut } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
+import {
+  buildInstagramProfileUrl,
+  formatInstagramDisplay,
+} from "@/lib/users/format-instagram-username";
 import { getUserProfile } from "@/lib/users/get-profile";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +62,23 @@ export default async function ProfilePage() {
         <div>
           <dt className="text-muted">居住地</dt>
           <dd>{profile?.location ?? "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-muted">Instagram</dt>
+          <dd>
+            {profile?.instagram_username ? (
+              <a
+                href={buildInstagramProfileUrl(profile.instagram_username)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent hover:underline"
+              >
+                {formatInstagramDisplay(profile.instagram_username)}
+              </a>
+            ) : (
+              "—"
+            )}
+          </dd>
         </div>
         <div>
           <dt className="text-muted">自己紹介</dt>

@@ -9,9 +9,13 @@ const EXTENSION_BY_MIME: Record<string, string> = {
   "image/gif": "gif",
 };
 
-export function getAvatarPublicUrl(storagePath: string): string {
+export function getAvatarPublicUrl(
+  storagePath: string,
+  version?: number,
+): string {
   const baseUrl = getSupabaseUrl().replace(/\/$/, "");
-  return `${baseUrl}/storage/v1/object/public/${AVATARS_BUCKET}/${storagePath}`;
+  const url = `${baseUrl}/storage/v1/object/public/${AVATARS_BUCKET}/${storagePath}`;
+  return version ? `${url}?v=${version}` : url;
 }
 
 function buildAvatarStoragePath(userId: string, mimeType: string): string {
@@ -37,5 +41,8 @@ export async function uploadAvatar(
     return { publicUrl: null, error: uploadError.message };
   }
 
-  return { publicUrl: getAvatarPublicUrl(storagePath), error: null };
+  return {
+    publicUrl: getAvatarPublicUrl(storagePath, Date.now()),
+    error: null,
+  };
 }

@@ -19,6 +19,7 @@ export interface User {
   avatar_url: string | null;
   bio: string | null;
   location: string | null;
+  instagram_username: string | null;
   provider: AuthProvider;
   is_public: boolean;
   is_banned: boolean;

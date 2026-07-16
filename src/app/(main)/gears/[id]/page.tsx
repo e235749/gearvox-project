@@ -11,28 +11,10 @@ import {
 interface GearDetailPageProps {
   params: Promise<{ id: string }>;
 }
-
-function formatReviewHeadline(
-  title: string | null,
-  body: string,
-): string {
-  if (title?.trim()) {
-    return title;
-  }
-  const trimmed = body.trim();
-  if (trimmed.length <= 80) {
-    return trimmed;
-  }
-  return `${trimmed.slice(0, 80)}…`;
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
+import {
+  formatReviewDate,
+  formatReviewHeadline,
+} from "@/lib/reviews/format-review-label";
 
 export const dynamic = "force-dynamic";
 
@@ -134,7 +116,7 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
                   </p>
                   <p className="mt-1 text-xs text-muted">
                     {review.author.display_name} ・ {review.rating} / 5 ・{" "}
-                    {formatDate(review.created_at)}
+                    {formatReviewDate(review.created_at)}
                   </p>
                 </Link>
               </li>
