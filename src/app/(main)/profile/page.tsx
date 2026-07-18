@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { ReviewListCard } from "@/components/reviews/review-list-card";
 import { signOut } from "@/lib/auth/actions";
+import { listReviewsByUserId } from "@/lib/reviews/list-user-reviews";
 import { createClient } from "@/lib/supabase/server";
 import {
   buildInstagramProfileUrl,
@@ -17,6 +19,7 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
 
   const profile = user ? await getUserProfile(user.id) : null;
+  const reviews = user ? await listReviewsByUserId(user.id) : [];
 
   return (
     <section className="space-y-6">
@@ -85,6 +88,41 @@ export default async function ProfilePage() {
           <dd className="whitespace-pre-wrap">{profile?.bio ?? "—"}</dd>
         </div>
       </dl>
+
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold tracking-tight">投稿したレビュー</h2>
+          <Link
+            href="/reviews/new"
+            className="text-sm text-accent hover:underline"
+          >
+            新規投稿
+          </Link>
+        </div>
+
+        {reviews.length > 0 ? (
+          <ul className="space-y-3">
+            {reviews.map((review) => (
+              <ReviewListCard
+                key={review.id}
+                review={review}
+                gear={review.gear}
+                showAuthor={false}
+              />
+            ))}
+          </ul>
+        ) : (
+          <div className="rounded-lg border border-border bg-surface p-4 text-sm text-muted">
+            <p>まだレビューを投稿していません。</p>
+            <Link
+              href="/reviews/new"
+              className="mt-2 inline-block text-accent hover:underline"
+            >
+              最初のレビューを投稿する
+            </Link>
+          </div>
+        )}
+      </section>
 
       <form action={signOut}>
         <button

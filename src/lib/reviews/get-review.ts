@@ -4,6 +4,8 @@ import type { ReviewDetail } from "@/lib/reviews/types";
 
 type ReviewRow = {
   id: string;
+  user_id: string;
+  gear_id: string;
   title: string | null;
   body: string;
   rating: number;
@@ -26,7 +28,7 @@ export async function getReviewById(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, title, body, rating, created_at, gears(id, name, brand), users(display_name)",
+      "id, user_id, gear_id, title, body, rating, created_at, gears(id, name, brand), users(display_name)",
     )
     .eq("id", reviewId)
     .eq("is_deleted", false)
@@ -61,6 +63,8 @@ export async function getReviewById(
 
   return {
     id: review.id,
+    user_id: review.user_id,
+    gear_id: review.gear_id,
     title: review.title,
     body: review.body,
     rating: review.rating,

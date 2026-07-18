@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ReviewOwnerActions } from "@/components/reviews/review-owner-actions";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { getReviewById } from "@/lib/reviews/get-review";
-import { getReviewImagePublicUrl } from "@/lib/reviews/upload-review-images";
+import { getReviewImagePublicUrl } from "@/lib/reviews/review-image-url";
+import { createClient } from "@/lib/supabase/server";
 
 interface ReviewDetailPageProps {
   params: Promise<{ id: string }>;
@@ -20,6 +22,12 @@ export default async function ReviewDetailPage({
   if (!review) {
     notFound();
   }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isOwner = user?.id === review.user_id;
 
   const gearLabel = formatGearLabel(review.gear.name, review.gear.brand);
 
@@ -63,6 +71,8 @@ export default async function ReviewDetailPage({
           ))}
         </div>
       ) : null}
+
+      {isOwner ? <ReviewOwnerActions reviewId={review.id} /> : null}
 
       <Link href="/reviews/new" className="text-sm text-accent hover:underline">
         別のレビューを投稿する

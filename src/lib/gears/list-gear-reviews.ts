@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { mapReviewImages } from "@/lib/reviews/map-review-images";
 
 import type { GearReviewListItem, GearReviewStats } from "@/lib/gears/types";
 
@@ -9,6 +10,11 @@ type ReviewRow = {
   rating: number;
   created_at: string;
   users: { display_name: string } | null;
+  review_images: Array<{
+    id: string;
+    storage_path: string;
+    display_order: number;
+  }> | null;
 };
 
 export async function listReviewsByGearId(
@@ -17,7 +23,9 @@ export async function listReviewsByGearId(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("reviews")
-    .select("id, title, body, rating, created_at, users(display_name)")
+    .select(
+      "id, title, body, rating, created_at, users(display_name), review_images(id, storage_path, display_order)",
+    )
     .eq("gear_id", gearId)
     .eq("is_deleted", false)
     .order("created_at", { ascending: false });
@@ -36,6 +44,7 @@ export async function listReviewsByGearId(
     author: {
       display_name: review.users?.display_name ?? "ユーザー",
     },
+    images: mapReviewImages(review.review_images),
   }));
 }
 

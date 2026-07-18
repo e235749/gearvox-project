@@ -1,12 +1,6 @@
-import { getSupabaseUrl } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
 const REVIEW_IMAGES_BUCKET = "review-images";
-
-export function getReviewImagePublicUrl(storagePath: string): string {
-  const baseUrl = getSupabaseUrl().replace(/\/$/, "");
-  return `${baseUrl}/storage/v1/object/public/${REVIEW_IMAGES_BUCKET}/${storagePath}`;
-}
 
 function buildStoragePath(
   userId: string,
@@ -22,6 +16,7 @@ export async function uploadReviewImages(
   userId: string,
   reviewId: string,
   images: File[],
+  startOrder = 0,
 ): Promise<{ error: string | null }> {
   if (images.length === 0) {
     return { error: null };
@@ -34,7 +29,7 @@ export async function uploadReviewImages(
     const storagePath = buildStoragePath(
       userId,
       reviewId,
-      index,
+      startOrder + index,
       image.name,
     );
 
@@ -52,7 +47,7 @@ export async function uploadReviewImages(
     const { error: insertError } = await supabase.from("review_images").insert({
       review_id: reviewId,
       storage_path: storagePath,
-      display_order: index,
+      display_order: startOrder + index,
     } as never);
 
     if (insertError) {

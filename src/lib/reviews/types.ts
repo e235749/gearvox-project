@@ -1,3 +1,5 @@
+import type { ReviewListImage } from "@/lib/reviews/map-review-images";
+
 export type ReviewActionResult = {
   success: boolean;
   error?: string;
@@ -6,6 +8,8 @@ export type ReviewActionResult = {
 
 export type ReviewDetail = {
   id: string;
+  user_id: string;
+  gear_id: string;
   title: string | null;
   body: string;
   rating: number;
@@ -39,4 +43,5 @@ export type FeedReviewListItem = {
     name: string;
     brand: string | null;
   };
+  images: ReviewListImage[];
 };

@@ -1,5 +1,7 @@
 import type { Gear, GearCategory } from "@/types/database";
 
+import type { ReviewListImage } from "@/lib/reviews/map-review-images";
+
 export type GearCategoryItem = Pick<GearCategory, "id" | "name">;
 
 export type GearListItem = Pick<
@@ -25,6 +27,7 @@ export type GearReviewListItem = {
   author: {
     display_name: string;
   };
+  images: ReviewListImage[];
 };
 
 export type GearReviewStats = {

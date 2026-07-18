@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ReviewListCard } from "@/components/reviews/review-list-card";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { getGearById } from "@/lib/gears/get-gear";
 import {
@@ -11,10 +12,6 @@ import {
 interface GearDetailPageProps {
   params: Promise<{ id: string }>;
 }
-import {
-  formatReviewDate,
-  formatReviewHeadline,
-} from "@/lib/reviews/format-review-label";
 
 export const dynamic = "force-dynamic";
 
@@ -104,22 +101,9 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
             </Link>
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {reviews.map((review) => (
-              <li key={review.id}>
-                <Link
-                  href={`/reviews/${review.id}`}
-                  className="block rounded-lg border border-border bg-surface px-4 py-3 text-sm transition-colors hover:border-accent/50"
-                >
-                  <p className="font-medium">
-                    {formatReviewHeadline(review.title, review.body)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted">
-                    {review.author.display_name} ・ {review.rating} / 5 ・{" "}
-                    {formatReviewDate(review.created_at)}
-                  </p>
-                </Link>
-              </li>
+              <ReviewListCard key={review.id} review={review} />
             ))}
           </ul>
         )}

@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { HOME_FEED_LIMIT } from "@/lib/reviews/constants";
 import { mapReviewImages } from "@/lib/reviews/map-review-images";
 import type { FeedReviewListItem } from "@/lib/reviews/types";
 
@@ -18,8 +17,8 @@ type ReviewRow = {
   }> | null;
 };
 
-export async function listLatestReviews(
-  limit = HOME_FEED_LIMIT,
+export async function listReviewsByUserId(
+  userId: string,
 ): Promise<FeedReviewListItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -27,12 +26,12 @@ export async function listLatestReviews(
     .select(
       "id, title, body, rating, created_at, gears(id, name, brand), users(display_name), review_images(id, storage_path, display_order)",
     )
+    .eq("user_id", userId)
     .eq("is_deleted", false)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("listLatestReviews:", error.message);
+    console.error("listReviewsByUserId:", error.message);
     return [];
   }
 

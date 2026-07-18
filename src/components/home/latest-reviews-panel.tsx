@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ReviewFeedCard } from "@/components/home/review-feed-card";
+import { ReviewListCard } from "@/components/reviews/review-list-card";
 import type { FeedReviewListItem } from "@/lib/reviews/types";
 
 interface LatestReviewsPanelProps {
@@ -22,7 +22,7 @@ export function LatestReviewsPanel({ reviews }: LatestReviewsPanelProps) {
   return (
     <ul className="space-y-3">
       {reviews.map((review) => (
-        <ReviewFeedCard key={review.id} review={review} />
+        <ReviewListCard key={review.id} review={review} gear={review.gear} />
       ))}
     </ul>
   );
