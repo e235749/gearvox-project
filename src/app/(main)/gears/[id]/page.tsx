@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { GearStatusBadge } from "@/components/gears/gear-status-badge";
 import { ReviewListCard } from "@/components/reviews/review-list-card";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { getGearById } from "@/lib/gears/get-gear";
@@ -48,9 +49,12 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
             </span>
           )}
           <div className="min-w-0 flex-1 space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {gear.name}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {gear.name}
+              </h1>
+              <GearStatusBadge status={gear.status} />
+            </div>
             {gear.brand ? (
               <p className="text-sm text-muted">{gear.brand}</p>
             ) : null}

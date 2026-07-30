@@ -2,22 +2,29 @@
 
 import { useMemo, useState } from "react";
 
+import { GearStatusBadge } from "@/components/gears/gear-status-badge";
+import { NewGearForm } from "@/components/reviews/new-gear-form";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { filterGearsByKeyword } from "@/lib/gears/filter-gears";
-import type { GearListItem } from "@/lib/gears/types";
+import type { GearCategoryItem, GearListItem } from "@/lib/gears/types";
 
 interface GearSelectorProps {
   gears: GearListItem[];
+  categories: GearCategoryItem[];
   selectedGearId: string | null;
   onSelect: (gearId: string) => void;
+  onGearCreated: (gear: GearListItem) => void;
 }
 
 export function GearSelector({
   gears,
+  categories,
   selectedGearId,
   onSelect,
+  onGearCreated,
 }: GearSelectorProps) {
   const [keyword, setKeyword] = useState("");
+  const [showNewGearForm, setShowNewGearForm] = useState(false);
 
   const filteredGears = useMemo(
     () => filterGearsByKeyword(gears, keyword),
@@ -25,13 +32,24 @@ export function GearSelector({
   );
 
   const selectedGear = gears.find((gear) => gear.id === selectedGearId) ?? null;
+  const canRegisterNewGear = keyword.trim().length > 0 && filteredGears.length === 0;
 
-  if (gears.length === 0) {
+  function handleGearCreated(gear: GearListItem) {
+    onGearCreated(gear);
+    onSelect(gear.id);
+    setShowNewGearForm(false);
+    setKeyword("");
+  }
+
+  if (showNewGearForm) {
     return (
-      <p className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-muted">
-        登録されているギアがありません。Supabase管理画面の Table Editor で
-        gears を追加してください。
-      </p>
+      <NewGearForm
+        gears={gears}
+        categories={categories}
+        initialName={keyword.trim()}
+        onCancel={() => setShowNewGearForm(false)}
+        onCreated={handleGearCreated}
+      />
     );
   }
 
@@ -54,9 +72,12 @@ export function GearSelector({
       {selectedGear ? (
         <div className="rounded-lg border border-accent/50 bg-accent/10 px-4 py-3 text-sm">
           <p className="text-muted">選択中</p>
-          <p className="font-medium">
-            {formatGearLabel(selectedGear.name, selectedGear.brand)}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-medium">
+              {formatGearLabel(selectedGear.name, selectedGear.brand)}
+            </p>
+            <GearStatusBadge status={selectedGear.status} />
+          </div>
         </div>
       ) : (
         <p className="text-sm text-muted">レビューするギアを選択してください。</p>
@@ -64,8 +85,17 @@ export function GearSelector({
 
       <ul className="max-h-72 space-y-2 overflow-y-auto">
         {filteredGears.length === 0 ? (
-          <li className="rounded-lg border border-border px-4 py-3 text-sm text-muted">
-            該当するギアが見つかりません。
+          <li className="space-y-3 rounded-lg border border-border px-4 py-3 text-sm text-muted">
+            <p>該当するギアが見つかりません。</p>
+            {canRegisterNewGear ? (
+              <button
+                type="button"
+                onClick={() => setShowNewGearForm(true)}
+                className="text-accent hover:underline"
+              >
+                「{keyword}」を新規ギアとして登録する
+              </button>
+            ) : null}
           </li>
         ) : (
           filteredGears.map((gear) => {
@@ -94,12 +124,13 @@ export function GearSelector({
                       Gear
                     </span>
                   )}
-                  <span className="flex-1">
-                    <span className="block font-medium">{gear.name}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="block font-medium">{gear.name}</span>
+                      <GearStatusBadge status={gear.status} />
+                    </span>
                     {gear.brand ? (
-                      <span className="block text-xs text-muted">
-                        {gear.brand}
-                      </span>
+                      <span className="block text-xs text-muted">{gear.brand}</span>
                     ) : null}
                   </span>
                 </button>
@@ -108,6 +139,16 @@ export function GearSelector({
           })
         )}
       </ul>
+
+      {filteredGears.length > 0 && keyword.trim() ? (
+        <button
+          type="button"
+          onClick={() => setShowNewGearForm(true)}
+          className="text-sm text-accent hover:underline"
+        >
+          見つからない場合は新規ギアを登録する
+        </button>
+      ) : null}
     </div>
   );
 }

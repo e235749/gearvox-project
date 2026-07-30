@@ -23,6 +23,7 @@ export interface User {
   provider: AuthProvider;
   is_public: boolean;
   is_banned: boolean;
+  is_admin: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -58,6 +59,10 @@ export interface Gear {
   category_id: string | null;
   description: string | null;
   image_url: string | null;
+  status: "approved" | "pending" | "merged" | "rejected";
+  submitted_by: string | null;
+  canonical_gear_id: string | null;
+  submitted_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -178,8 +183,25 @@ export interface Database {
       };
       gears: {
         Row: Gear;
-        Insert: Omit<Gear, "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Gear,
+          | "id"
+          | "created_at"
+          | "updated_at"
+          | "description"
+          | "image_url"
+          | "canonical_gear_id"
+          | "submitted_by"
+          | "submitted_name"
+          | "status"
+        > & {
           id?: string;
+          description?: string | null;
+          image_url?: string | null;
+          status?: Gear["status"];
+          submitted_by?: string | null;
+          canonical_gear_id?: string | null;
+          submitted_name?: string | null;
           created_at?: string;
           updated_at?: string;
         };

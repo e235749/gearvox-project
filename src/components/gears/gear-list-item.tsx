@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { GearStatusBadge } from "@/components/gears/gear-status-badge";
 import type { GearListItem } from "@/lib/gears/types";
 
 interface GearListItemCardProps {
@@ -27,7 +28,10 @@ export function GearListItemCard({ gear }: GearListItemCardProps) {
           </span>
         )}
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium">{gear.name}</span>
+          <span className="flex items-center gap-2">
+            <span className="block truncate font-medium">{gear.name}</span>
+            <GearStatusBadge status={gear.status} />
+          </span>
           {gear.brand ? (
             <span className="block truncate text-xs text-muted">{gear.brand}</span>
           ) : null}

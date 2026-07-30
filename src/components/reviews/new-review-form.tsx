@@ -8,20 +8,32 @@ import { GearSelector } from "@/components/reviews/gear-selector";
 import { ImageUploadInput } from "@/components/reviews/image-upload-input";
 import { StarRatingInput } from "@/components/reviews/star-rating-input";
 import { createReview } from "@/lib/reviews/actions";
-import type { GearListItem } from "@/lib/gears/types";
+import type { GearCategoryItem, GearListItem } from "@/lib/gears/types";
 
 interface NewReviewFormProps {
   gears: GearListItem[];
+  categories: GearCategoryItem[];
 }
 
-export function NewReviewForm({ gears }: NewReviewFormProps) {
+export function NewReviewForm({ gears: initialGears, categories }: NewReviewFormProps) {
   const router = useRouter();
+  const [gears, setGears] = useState(initialGears);
   const [selectedGearId, setSelectedGearId] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
   const canSubmit = selectedGearId !== null && rating >= 1;
+
+  function handleGearCreated(gear: GearListItem) {
+    setGears((current) => {
+      if (current.some((item) => item.id === gear.id)) {
+        return current;
+      }
+
+      return [...current, gear].sort((a, b) => a.name.localeCompare(b.name, "ja"));
+    });
+  }
 
   async function handleSubmit(formData: FormData) {
     setError(null);
@@ -60,8 +72,10 @@ export function NewReviewForm({ gears }: NewReviewFormProps) {
         <legend className="text-sm font-medium">ギア選択</legend>
         <GearSelector
           gears={gears}
+          categories={categories}
           selectedGearId={selectedGearId}
           onSelect={setSelectedGearId}
+          onGearCreated={handleGearCreated}
         />
       </fieldset>
 

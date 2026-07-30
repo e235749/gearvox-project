@@ -138,7 +138,7 @@ export async function createReview(
 
   const { data: gear, error: gearError } = await supabase
     .from("gears")
-    .select("id")
+    .select("id, status")
     .eq("id", input.gearId)
     .maybeSingle();
 
@@ -150,6 +150,11 @@ export async function createReview(
   if (!gear) {
     logCreateReview("gear not found", { gearId: input.gearId });
     return { success: false, error: "選択したギアが見つかりません。" };
+  }
+
+  const gearStatus = (gear as { id: string; status: string }).status;
+  if (gearStatus !== "approved" && gearStatus !== "pending") {
+    return { success: false, error: "選択したギアはレビュー投稿に使用できません。" };
   }
 
   const contextSnapshot = await buildContextSnapshot(user.id);
