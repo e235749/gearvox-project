@@ -26,6 +26,7 @@ export type GearReviewListItem = {
   rating: number;
   created_at: string;
   author: {
+    id: string;
     display_name: string;
   };
   images: ReviewListImage[];

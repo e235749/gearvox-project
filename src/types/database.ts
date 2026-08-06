@@ -1,10 +1,6 @@
 export type AuthProvider = "google" | "apple" | "email";
 
-export type ContextAnswerCategory =
-  | "cat2_style"
-  | "cat3_season"
-  | "cat5_activity"
-  | "cat6_space";
+export type ContextAnswerCategory = "companions" | "gear_tags";
 
 export type NotificationType = "like" | "comment" | "follow";
 
@@ -22,6 +18,7 @@ export interface User {
   instagram_username: string | null;
   provider: AuthProvider;
   is_public: boolean;
+  is_context_public: boolean;
   is_banned: boolean;
   is_admin: boolean;
   created_at: string;
@@ -31,8 +28,14 @@ export interface User {
 export interface UserContext {
   id: string;
   user_id: string;
-  cat1_companion: string | null;
-  cat4_transport: string | null;
+  experience_years: string | null;
+  annual_frequency: string | null;
+  transport: string | null;
+  transport_other: string | null;
+  primary_season: string | null;
+  stay_duration: string | null;
+  primary_purpose: string | null;
+  primary_purpose_other: string | null;
   completed_at: string | null;
   updated_at: string;
 }

@@ -16,6 +16,7 @@ interface ReviewListCardProps {
     rating: number;
     created_at: string;
     author: {
+      id: string;
       display_name: string;
     };
     images: ReviewListImage[];
@@ -39,7 +40,12 @@ export function ReviewListCard({
         <div className="space-y-2">
           <div className="flex items-start justify-between gap-3">
             {showAuthor ? (
-              <p className="font-medium">{review.author.display_name}</p>
+              <Link
+                href={`/users/${review.author.id}`}
+                className="font-medium transition-colors hover:text-accent"
+              >
+                {review.author.display_name}
+              </Link>
             ) : (
               <span />
             )}

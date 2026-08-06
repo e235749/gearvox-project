@@ -20,6 +20,7 @@ export type ReviewDetail = {
     brand: string | null;
   };
   author: {
+    id: string;
     display_name: string;
   };
   images: Array<{
@@ -36,6 +37,7 @@ export type FeedReviewListItem = {
   rating: number;
   created_at: string;
   author: {
+    id: string;
     display_name: string;
   };
   gear: {

@@ -1,7 +1,10 @@
 import Link from "next/link";
 
+import { ContextPrivacyToggle } from "@/components/profile/context-privacy-toggle";
 import { ReviewListCard } from "@/components/reviews/review-list-card";
 import { signOut } from "@/lib/auth/actions";
+import { formatContextSummaryLines } from "@/lib/context/format-context-summary";
+import { getUserContextSummary } from "@/lib/context/get-user-context";
 import { listReviewsByUserId } from "@/lib/reviews/list-user-reviews";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -20,6 +23,10 @@ export default async function ProfilePage() {
 
   const profile = user ? await getUserProfile(user.id) : null;
   const reviews = user ? await listReviewsByUserId(user.id) : [];
+  const contextSummary = user ? await getUserContextSummary(user.id) : null;
+  const contextLines = contextSummary
+    ? formatContextSummaryLines(contextSummary)
+    : [];
 
   return (
     <section className="space-y-6">
@@ -63,6 +70,10 @@ export default async function ProfilePage() {
           <dd>{profile?.is_public === false ? "非公開" : "公開"}</dd>
         </div>
         <div>
+          <dt className="text-muted">キャンプスタイル公開</dt>
+          <dd>{profile?.is_context_public === false ? "非公開" : "公開"}</dd>
+        </div>
+        <div>
           <dt className="text-muted">居住地</dt>
           <dd>{profile?.location ?? "—"}</dd>
         </div>
@@ -88,6 +99,45 @@ export default async function ProfilePage() {
           <dd className="whitespace-pre-wrap">{profile?.bio ?? "—"}</dd>
         </div>
       </dl>
+
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold tracking-tight">キャンプスタイル</h2>
+          <Link
+            href="/profile/context"
+            className="text-sm text-accent hover:underline"
+          >
+            {contextSummary?.isCompleted ? "編集" : "設定する"}
+          </Link>
+        </div>
+
+        <div className="rounded-lg border border-border bg-surface p-4">
+          <ContextPrivacyToggle
+            initialIsPublic={profile?.is_context_public !== false}
+          />
+        </div>
+
+        {contextSummary?.isCompleted ? (
+          <dl className="space-y-3 rounded-lg border border-border bg-surface p-4 text-sm">
+            {contextLines.map((line) => (
+              <div key={line.label}>
+                <dt className="text-muted">{line.label}</dt>
+                <dd>{line.value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <div className="rounded-lg border border-border bg-surface p-4 text-sm text-muted">
+            <p>まだアンケートに回答していません。</p>
+            <Link
+              href="/profile/context?welcome=1"
+              className="mt-2 inline-block text-accent hover:underline"
+            >
+              キャンプスタイルを設定する
+            </Link>
+          </div>
+        )}
+      </section>
 
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4">

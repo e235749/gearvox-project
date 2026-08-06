@@ -9,7 +9,7 @@ type ReviewRow = {
   body: string;
   rating: number;
   created_at: string;
-  users: { display_name: string } | null;
+  users: { id: string; display_name: string } | null;
   review_images: Array<{
     id: string;
     storage_path: string;
@@ -24,7 +24,7 @@ export async function listReviewsByGearId(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, title, body, rating, created_at, users(display_name), review_images(id, storage_path, display_order)",
+      "id, title, body, rating, created_at, users(id, display_name), review_images(id, storage_path, display_order)",
     )
     .eq("gear_id", gearId)
     .eq("is_deleted", false)
@@ -35,14 +35,17 @@ export async function listReviewsByGearId(
     return [];
   }
 
-  return ((data ?? []) as ReviewRow[]).map((review) => ({
+  return ((data ?? []) as ReviewRow[])
+    .filter((review) => review.users !== null)
+    .map((review) => ({
     id: review.id,
     title: review.title,
     body: review.body,
     rating: review.rating,
     created_at: review.created_at,
     author: {
-      display_name: review.users?.display_name ?? "ユーザー",
+      id: review.users!.id,
+      display_name: review.users!.display_name,
     },
     images: mapReviewImages(review.review_images),
   }));

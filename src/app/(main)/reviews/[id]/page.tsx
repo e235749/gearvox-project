@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ReviewOwnerActions } from "@/components/reviews/review-owner-actions";
+import { FollowButton } from "@/components/users/follow-button";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
+import { isFollowing } from "@/lib/follows/is-following";
 import { getReviewById } from "@/lib/reviews/get-review";
 import { getReviewImagePublicUrl } from "@/lib/reviews/review-image-url";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +30,10 @@ export default async function ReviewDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
   const isOwner = user?.id === review.user_id;
+  const following =
+    user && !isOwner
+      ? await isFollowing(user.id, review.user_id)
+      : false;
 
   const gearLabel = formatGearLabel(review.gear.name, review.gear.brand);
 
@@ -38,9 +44,24 @@ export default async function ReviewDetailPage({
         <h1 className="text-2xl font-semibold tracking-tight">
           {review.title ?? gearLabel}
         </h1>
-        <p className="text-sm text-muted">
-          {review.author.display_name} ・ {review.rating} / 5
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted">
+            <Link
+              href={`/users/${review.author.id}`}
+              className="font-medium text-foreground transition-colors hover:text-accent"
+            >
+              {review.author.display_name}
+            </Link>
+            {" ・ "}
+            {review.rating} / 5
+          </p>
+          {user && !isOwner ? (
+            <FollowButton
+              targetUserId={review.user_id}
+              initialIsFollowing={following}
+            />
+          ) : null}
+        </div>
       </header>
 
       <div className="rounded-lg border border-border bg-surface p-4 text-sm">

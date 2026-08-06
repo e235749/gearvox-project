@@ -1,14 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ContextAnswerCategory } from "@/types/database";
 
+type UserContextRow = {
+  experience_years: string | null;
+  annual_frequency: string | null;
+  transport: string | null;
+  transport_other: string | null;
+  primary_season: string | null;
+  stay_duration: string | null;
+  primary_purpose: string | null;
+  primary_purpose_other: string | null;
+};
+
 type ContextAnswerRow = {
   category: ContextAnswerCategory;
   answer_value: string;
-};
-
-type UserContextRow = {
-  cat1_companion: string | null;
-  cat4_transport: string | null;
 };
 
 export async function buildContextSnapshot(
@@ -18,7 +24,9 @@ export async function buildContextSnapshot(
 
   const { data: userContextData } = await supabase
     .from("user_contexts")
-    .select("cat1_companion, cat4_transport")
+    .select(
+      "experience_years, annual_frequency, transport, transport_other, primary_season, stay_duration, primary_purpose, primary_purpose_other",
+    )
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -36,10 +44,8 @@ export async function buildContextSnapshot(
   }
 
   const groupedAnswers = {
-    cat2_style: [] as string[],
-    cat3_season: [] as string[],
-    cat5_activity: [] as string[],
-    cat6_space: [] as string[],
+    companions: [] as string[],
+    gear_tags: [] as string[],
   };
 
   answers.forEach((answer) => {
@@ -51,8 +57,14 @@ export async function buildContextSnapshot(
   });
 
   return {
-    cat1_companion: userContext?.cat1_companion ?? null,
-    cat4_transport: userContext?.cat4_transport ?? null,
+    experience_years: userContext?.experience_years ?? null,
+    annual_frequency: userContext?.annual_frequency ?? null,
+    transport: userContext?.transport ?? null,
+    transport_other: userContext?.transport_other ?? null,
+    primary_season: userContext?.primary_season ?? null,
+    stay_duration: userContext?.stay_duration ?? null,
+    primary_purpose: userContext?.primary_purpose ?? null,
+    primary_purpose_other: userContext?.primary_purpose_other ?? null,
     ...groupedAnswers,
     captured_at: new Date().toISOString(),
   };

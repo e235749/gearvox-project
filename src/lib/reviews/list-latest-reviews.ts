@@ -10,7 +10,7 @@ type ReviewRow = {
   rating: number;
   created_at: string;
   gears: { id: string; name: string; brand: string | null } | null;
-  users: { display_name: string } | null;
+  users: { id: string; display_name: string } | null;
   review_images: Array<{
     id: string;
     storage_path: string;
@@ -25,7 +25,7 @@ export async function listLatestReviews(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, title, body, rating, created_at, gears(id, name, brand), users(display_name), review_images(id, storage_path, display_order)",
+      "id, title, body, rating, created_at, gears(id, name, brand), users(id, display_name), review_images(id, storage_path, display_order)",
     )
     .eq("is_deleted", false)
     .order("created_at", { ascending: false })
@@ -37,7 +37,7 @@ export async function listLatestReviews(
   }
 
   return ((data ?? []) as ReviewRow[])
-    .filter((review) => review.gears !== null)
+    .filter((review) => review.gears !== null && review.users !== null)
     .map((review) => ({
       id: review.id,
       title: review.title,
@@ -45,7 +45,8 @@ export async function listLatestReviews(
       rating: review.rating,
       created_at: review.created_at,
       author: {
-        display_name: review.users?.display_name ?? "ユーザー",
+        id: review.users!.id,
+        display_name: review.users!.display_name,
       },
       gear: {
         id: review.gears!.id,

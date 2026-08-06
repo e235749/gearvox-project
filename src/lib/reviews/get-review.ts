@@ -11,7 +11,7 @@ type ReviewRow = {
   rating: number;
   created_at: string;
   gears: { id: string; name: string; brand: string | null } | null;
-  users: { display_name: string } | null;
+  users: { id: string; display_name: string } | null;
 };
 
 type ReviewImageRow = {
@@ -28,7 +28,7 @@ export async function getReviewById(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, gear_id, title, body, rating, created_at, gears(id, name, brand), users(display_name)",
+      "id, user_id, gear_id, title, body, rating, created_at, gears(id, name, brand), users(id, display_name)",
     )
     .eq("id", reviewId)
     .eq("is_deleted", false)
@@ -75,6 +75,7 @@ export async function getReviewById(
       brand: gear.brand,
     },
     author: {
+      id: author?.id ?? review.user_id,
       display_name: author?.display_name ?? "ユーザー",
     },
     images,
