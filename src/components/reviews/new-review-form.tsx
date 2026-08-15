@@ -8,6 +8,10 @@ import { GearSelector } from "@/components/reviews/gear-selector";
 import { ImageUploadInput } from "@/components/reviews/image-upload-input";
 import { StarRatingInput } from "@/components/reviews/star-rating-input";
 import { createReview } from "@/lib/reviews/actions";
+import {
+  prepareReviewImagesForUpload,
+  replaceReviewImagesInFormData,
+} from "@/lib/reviews/prepare-review-images";
 import type { GearCategoryItem, GearListItem } from "@/lib/gears/types";
 
 interface NewReviewFormProps {
@@ -40,6 +44,12 @@ export function NewReviewForm({ gears: initialGears, categories }: NewReviewForm
     setIsPending(true);
 
     try {
+      const rawImages = formData
+        .getAll("images")
+        .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+      const preparedImages = await prepareReviewImagesForUpload(rawImages);
+      replaceReviewImagesInFormData(formData, preparedImages);
+
       const result = await createReview(null, formData);
 
       if (process.env.NODE_ENV === "development") {
@@ -52,6 +62,12 @@ export function NewReviewForm({ gears: initialGears, categories }: NewReviewForm
       }
 
       setError(result.error ?? "投稿に失敗しました。");
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "投稿に失敗しました。",
+      );
     } finally {
       setIsPending(false);
     }

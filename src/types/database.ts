@@ -288,5 +288,33 @@ export interface Database {
         Update: Partial<Omit<UserSimilarity, "id">>;
       };
     };
+    Views: Record<string, never>;
+    Functions: {
+      is_blocked: {
+        Args: {
+          viewer_id: string;
+          target_user_id: string;
+        };
+        Returns: boolean;
+      };
+      list_my_blocked_users: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          blocked_id: string;
+          display_name: string;
+          avatar_url: string | null;
+          blocked_at: string;
+        }>;
+      };
+      should_notify_user: {
+        Args: {
+          actor_id: string;
+          recipient_id: string;
+        };
+        Returns: boolean;
+      };
+    };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }

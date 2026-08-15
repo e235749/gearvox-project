@@ -2,9 +2,14 @@ import Link from "next/link";
 
 import { ContextPrivacyToggle } from "@/components/profile/context-privacy-toggle";
 import { ReviewListCard } from "@/components/reviews/review-list-card";
+import { BlockedUsersList } from "@/components/users/blocked-users-list";
+import { SimilarUsersSection } from "@/components/similarity/similar-users-section";
 import { signOut } from "@/lib/auth/actions";
+import { listBlockedUsers } from "@/lib/blocks/list-blocked-users";
+import { listSimilarUsersForProfile } from "@/lib/similarity/list-similar-users";
 import { formatContextSummaryLines } from "@/lib/context/format-context-summary";
 import { getUserContextSummary } from "@/lib/context/get-user-context";
+import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
 import { listReviewsByUserId } from "@/lib/reviews/list-user-reviews";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -23,6 +28,9 @@ export default async function ProfilePage() {
 
   const profile = user ? await getUserProfile(user.id) : null;
   const reviews = user ? await listReviewsByUserId(user.id) : [];
+  const blockedUsers = user ? await listBlockedUsers() : [];
+  const similarUsers = user ? await listSimilarUsersForProfile(user.id) : [];
+  const engagements = await loadEngagementsForReviews(reviews, user?.id);
   const contextSummary = user ? await getUserContextSummary(user.id) : null;
   const contextLines = contextSummary
     ? formatContextSummaryLines(contextSummary)
@@ -139,6 +147,11 @@ export default async function ProfilePage() {
         )}
       </section>
 
+      <SimilarUsersSection
+        similarUsers={similarUsers}
+        isContextCompleted={contextSummary?.isCompleted ?? false}
+      />
+
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-lg font-semibold tracking-tight">投稿したレビュー</h2>
@@ -158,6 +171,8 @@ export default async function ProfilePage() {
                 review={review}
                 gear={review.gear}
                 showAuthor={false}
+                engagement={engagements[review.id]}
+                currentUserId={user?.id ?? null}
               />
             ))}
           </ul>
@@ -172,6 +187,11 @@ export default async function ProfilePage() {
             </Link>
           </div>
         )}
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight">ブロック中のユーザー</h2>
+        <BlockedUsersList blockedUsers={blockedUsers} />
       </section>
 
       <form action={signOut}>

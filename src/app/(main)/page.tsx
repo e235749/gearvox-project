@@ -8,8 +8,10 @@ import {
   parseHomeFeedTab,
   type HomeFeedTab,
 } from "@/lib/reviews/constants";
+import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
 import { listFollowingReviews } from "@/lib/reviews/list-following-reviews";
 import { listLatestReviews } from "@/lib/reviews/list-latest-reviews";
+import { loadSimilarityDisplaysForReviewAuthors } from "@/lib/similarity/load-review-author-similarities";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +41,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     user ? hasCompletedContextQuestionnaire(user.id).then((done) => !done) : false,
   ]);
 
+  const activeReviews =
+    activeTab === "latest" ? latestReviews : followingReviews;
+  const engagements = await loadEngagementsForReviews(activeReviews, user?.id);
+  const authorSimilarities = await loadSimilarityDisplaysForReviewAuthors(
+    user?.id,
+    activeReviews.map((review) => review.author.id),
+  );
+
   return (
     <section className="space-y-6">
       <header>
@@ -51,11 +61,19 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <ContextPromptBanner show={showContextPrompt} />
 
       {activeTab === "latest" ? (
-        <LatestReviewsPanel reviews={latestReviews} />
+        <LatestReviewsPanel
+          reviews={latestReviews}
+          engagements={engagements}
+          authorSimilarities={authorSimilarities}
+          currentUserId={user?.id ?? null}
+        />
       ) : (
         <FollowingReviewsPanel
           reviews={followingReviews}
           followingCount={followingIds.length}
+          engagements={engagements}
+          authorSimilarities={authorSimilarities}
+          currentUserId={user?.id ?? null}
         />
       )}
     </section>

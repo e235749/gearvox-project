@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { FollowActionResult } from "@/lib/follows/types";
+import { createNotification } from "@/lib/notifications/create-notification";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database";
 
@@ -11,6 +12,7 @@ type FollowInsert = Database["public"]["Tables"]["follows"]["Insert"];
 function revalidateFollowPaths(targetUserId: string): void {
   revalidatePath("/");
   revalidatePath(`/users/${targetUserId}`);
+  revalidatePath("/notifications");
 }
 
 export async function followUser(targetUserId: string): Promise<FollowActionResult> {
@@ -57,6 +59,12 @@ export async function followUser(targetUserId: string): Promise<FollowActionResu
     console.error("[followUser] insert error:", insertError.message);
     return { success: false, error: "フォローに失敗しました。" };
   }
+
+  await createNotification({
+    recipientUserId: targetUserId,
+    actorId: user.id,
+    type: "follow",
+  });
 
   revalidateFollowPaths(targetUserId);
   return { success: true, isFollowing: true };

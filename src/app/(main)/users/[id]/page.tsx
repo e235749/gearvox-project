@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { BlockButton } from "@/components/users/block-button";
 import { FollowButton } from "@/components/users/follow-button";
 import { ReviewListCard } from "@/components/reviews/review-list-card";
 import { formatContextSummaryLines } from "@/lib/context/format-context-summary";
 import { getUserContextSummary } from "@/lib/context/get-user-context";
 import { isFollowing } from "@/lib/follows/is-following";
 import { listReviewsByUserId } from "@/lib/reviews/list-user-reviews";
+import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
 import {
   buildInstagramProfileUrl,
   formatInstagramDisplay,
@@ -47,6 +49,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
       ? getUserContextSummary(id)
       : Promise.resolve(null),
   ]);
+  const engagements = await loadEngagementsForReviews(reviews, user?.id);
 
   const contextLines =
     contextSummary?.isCompleted && contextSummary
@@ -78,7 +81,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           </div>
         </div>
         {user ? (
-          <FollowButton targetUserId={id} initialIsFollowing={following} />
+          <div className="flex flex-col items-end gap-2">
+            <FollowButton targetUserId={id} initialIsFollowing={following} />
+            <BlockButton targetUserId={id} redirectOnBlock="/" />
+          </div>
         ) : null}
       </header>
 
@@ -141,6 +147,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 review={review}
                 gear={review.gear}
                 showAuthor={false}
+                engagement={engagements[review.id]}
+                currentUserId={user?.id ?? null}
               />
             ))}
           </ul>

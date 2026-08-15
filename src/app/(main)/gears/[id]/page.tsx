@@ -9,6 +9,9 @@ import {
   getGearReviewStats,
   listReviewsByGearId,
 } from "@/lib/gears/list-gear-reviews";
+import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
+import { loadSimilarityDisplaysForReviewAuthors } from "@/lib/similarity/load-review-author-similarities";
+import { createClient } from "@/lib/supabase/server";
 
 interface GearDetailPageProps {
   params: Promise<{ id: string }>;
@@ -18,11 +21,21 @@ export const dynamic = "force-dynamic";
 
 export default async function GearDetailPage({ params }: GearDetailPageProps) {
   const { id } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const [gear, reviews, stats] = await Promise.all([
     getGearById(id),
     listReviewsByGearId(id),
     getGearReviewStats(id),
   ]);
+  const engagements = await loadEngagementsForReviews(reviews, user?.id);
+  const authorSimilarities = await loadSimilarityDisplaysForReviewAuthors(
+    user?.id,
+    reviews.map((review) => review.author.id),
+  );
 
   if (!gear) {
     notFound();
@@ -107,7 +120,13 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
         ) : (
           <ul className="space-y-3">
             {reviews.map((review) => (
-              <ReviewListCard key={review.id} review={review} />
+              <ReviewListCard
+                key={review.id}
+                review={review}
+                engagement={engagements[review.id]}
+                authorSimilarity={authorSimilarities[review.author.id]}
+                currentUserId={user?.id ?? null}
+              />
             ))}
           </ul>
         )}

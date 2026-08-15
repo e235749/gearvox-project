@@ -8,6 +8,10 @@ import { ImageUploadInput } from "@/components/reviews/image-upload-input";
 import { StarRatingInput } from "@/components/reviews/star-rating-input";
 import { MAX_REVIEW_IMAGES } from "@/lib/reviews/constants";
 import { updateReview } from "@/lib/reviews/actions";
+import {
+  prepareReviewImagesForUpload,
+  replaceReviewImagesInFormData,
+} from "@/lib/reviews/prepare-review-images";
 import { getReviewImagePublicUrl } from "@/lib/reviews/review-image-url";
 import type { ReviewDetail } from "@/lib/reviews/types";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
@@ -31,6 +35,12 @@ export function EditReviewForm({ review }: EditReviewFormProps) {
     setIsPending(true);
 
     try {
+      const rawImages = formData
+        .getAll("images")
+        .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+      const preparedImages = await prepareReviewImagesForUpload(rawImages);
+      replaceReviewImagesInFormData(formData, preparedImages);
+
       const result = await updateReview(null, formData);
 
       if (result.success && result.reviewId) {
@@ -40,6 +50,12 @@ export function EditReviewForm({ review }: EditReviewFormProps) {
       }
 
       setError(result.error ?? "更新に失敗しました。");
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "更新に失敗しました。",
+      );
     } finally {
       setIsPending(false);
     }

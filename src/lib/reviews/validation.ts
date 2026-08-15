@@ -1,8 +1,12 @@
 import {
-  ALLOWED_IMAGE_TYPES,
   MAX_IMAGE_SIZE_BYTES,
+  MAX_IMAGE_SIZE_MB,
   MAX_REVIEW_IMAGES,
 } from "@/lib/reviews/constants";
+import {
+  getReviewImageFormatLabel,
+  isAllowedReviewImageType,
+} from "@/lib/reviews/image-file";
 
 export interface CreateReviewInput {
   gearId: string;
@@ -59,13 +63,11 @@ export function validateCreateReviewInput(
   }
 
   for (const image of input.images) {
-    if (!ALLOWED_IMAGE_TYPES.includes(
-      image.type as (typeof ALLOWED_IMAGE_TYPES)[number],
-    )) {
-      return "画像形式は JPEG / PNG / WebP / GIF のみ対応しています。";
+    if (!isAllowedReviewImageType(image)) {
+      return `画像形式は ${getReviewImageFormatLabel()} のみ対応しています。`;
     }
     if (image.size > MAX_IMAGE_SIZE_BYTES) {
-      return "画像サイズは1枚あたり5MB以内にしてください。";
+      return `画像サイズは1枚あたり${MAX_IMAGE_SIZE_MB}MB以内にしてください。`;
     }
   }
 
@@ -119,13 +121,11 @@ function validateReviewContent(input: {
   }
 
   for (const image of input.images) {
-    if (!ALLOWED_IMAGE_TYPES.includes(
-      image.type as (typeof ALLOWED_IMAGE_TYPES)[number],
-    )) {
-      return "画像形式は JPEG / PNG / WebP / GIF のみ対応しています。";
+    if (!isAllowedReviewImageType(image)) {
+      return `画像形式は ${getReviewImageFormatLabel()} のみ対応しています。`;
     }
     if (image.size > MAX_IMAGE_SIZE_BYTES) {
-      return "画像サイズは1枚あたり5MB以内にしてください。";
+      return `画像サイズは1枚あたり${MAX_IMAGE_SIZE_MB}MB以内にしてください。`;
     }
   }
 
