@@ -1,10 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { AUTH_ROUTES, PUBLIC_ROUTES } from "@/lib/auth/constants";
+import { AUTH_ROUTES, INTERNAL_API_PREFIXES, PUBLIC_ROUTES } from "@/lib/auth/constants";
 import type { Database } from "@/types/database";
 
 function isPublicRoute(pathname: string): boolean {
+  if (
+    INTERNAL_API_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+  ) {
+    return true;
+  }
+
   return PUBLIC_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );

@@ -1,10 +1,6 @@
 export type AuthProvider = "google" | "apple" | "email";
 
-export type ContextAnswerCategory =
-  | "cat2_style"
-  | "cat3_season"
-  | "cat5_activity"
-  | "cat6_space";
+export type ContextAnswerCategory = "companions" | "gear_tags";
 
 export type NotificationType = "like" | "comment" | "follow";
 
@@ -19,9 +15,12 @@ export interface User {
   avatar_url: string | null;
   bio: string | null;
   location: string | null;
+  instagram_username: string | null;
   provider: AuthProvider;
   is_public: boolean;
+  is_context_public: boolean;
   is_banned: boolean;
+  is_admin: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -29,8 +28,14 @@ export interface User {
 export interface UserContext {
   id: string;
   user_id: string;
-  cat1_companion: string | null;
-  cat4_transport: string | null;
+  experience_years: string | null;
+  annual_frequency: string | null;
+  transport: string | null;
+  transport_other: string | null;
+  primary_season: string | null;
+  stay_duration: string | null;
+  primary_purpose: string | null;
+  primary_purpose_other: string | null;
   completed_at: string | null;
   updated_at: string;
 }
@@ -57,6 +62,10 @@ export interface Gear {
   category_id: string | null;
   description: string | null;
   image_url: string | null;
+  status: "approved" | "pending" | "merged" | "rejected";
+  submitted_by: string | null;
+  canonical_gear_id: string | null;
+  submitted_name: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -177,8 +186,25 @@ export interface Database {
       };
       gears: {
         Row: Gear;
-        Insert: Omit<Gear, "id" | "created_at" | "updated_at"> & {
+        Insert: Omit<
+          Gear,
+          | "id"
+          | "created_at"
+          | "updated_at"
+          | "description"
+          | "image_url"
+          | "canonical_gear_id"
+          | "submitted_by"
+          | "submitted_name"
+          | "status"
+        > & {
           id?: string;
+          description?: string | null;
+          image_url?: string | null;
+          status?: Gear["status"];
+          submitted_by?: string | null;
+          canonical_gear_id?: string | null;
+          submitted_name?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -262,5 +288,33 @@ export interface Database {
         Update: Partial<Omit<UserSimilarity, "id">>;
       };
     };
+    Views: Record<string, never>;
+    Functions: {
+      is_blocked: {
+        Args: {
+          viewer_id: string;
+          target_user_id: string;
+        };
+        Returns: boolean;
+      };
+      list_my_blocked_users: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          blocked_id: string;
+          display_name: string;
+          avatar_url: string | null;
+          blocked_at: string;
+        }>;
+      };
+      should_notify_user: {
+        Args: {
+          actor_id: string;
+          recipient_id: string;
+        };
+        Returns: boolean;
+      };
+    };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }

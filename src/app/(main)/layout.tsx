@@ -7,6 +7,9 @@ import {
   IconUser,
 } from "@tabler/icons-react";
 
+import { getUnreadNotificationCount } from "@/lib/notifications/list-notifications";
+import { createClient } from "@/lib/supabase/server";
+
 const navItems = [
   { href: "/", label: "ホーム", icon: IconHome },
   { href: "/search", label: "検索", icon: IconSearch },
@@ -15,11 +18,17 @@ const navItems = [
   { href: "/profile", label: "マイページ", icon: IconUser },
 ] as const;
 
-export default function MainLayout({
+export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const unreadCount = user ? await getUnreadNotificationCount(user.id) : 0;
+
   return (
     <div className="mx-auto flex min-h-full w-full max-w-lg flex-col">
       <main className="flex-1 px-4 pb-24 pt-6">{children}</main>
@@ -40,13 +49,24 @@ export default function MainLayout({
                 </li>
               );
             }
+
+            const showUnreadBadge =
+              item.href === "/notifications" && unreadCount > 0;
+
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="flex flex-col items-center gap-1 px-3 py-2 text-muted transition-colors hover:text-accent"
+                  className="relative flex flex-col items-center gap-1 px-3 py-2 text-muted transition-colors hover:text-accent"
                 >
-                  <Icon size={24} stroke={1.5} />
+                  <span className="relative">
+                    <Icon size={24} stroke={1.5} />
+                    {showUnreadBadge ? (
+                      <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-medium text-background">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    ) : null}
+                  </span>
                   <span className="text-xs">{item.label}</span>
                 </Link>
               </li>

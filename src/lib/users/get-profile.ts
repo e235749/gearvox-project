@@ -3,7 +3,14 @@ import type { User } from "@/types/database";
 
 export type UserProfile = Pick<
   User,
-  "display_name" | "email" | "avatar_url" | "bio" | "location"
+  | "display_name"
+  | "email"
+  | "avatar_url"
+  | "bio"
+  | "location"
+  | "instagram_username"
+  | "is_public"
+  | "is_context_public"
 >;
 
 export async function getUserProfile(
@@ -12,7 +19,9 @@ export async function getUserProfile(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("users")
-    .select("display_name, email, avatar_url, bio, location")
+    .select(
+      "display_name, email, avatar_url, bio, location, instagram_username, is_public, is_context_public",
+    )
     .eq("id", userId)
     .maybeSingle();
 
