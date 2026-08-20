@@ -11,4 +11,7 @@ export const PUBLIC_ROUTES = [
   AUTH_ROUTES.callback,
 ] as const;
 
+/** ログイン不要で通す内部 API（ルート側で別途認証） */
+export const INTERNAL_API_PREFIXES = ["/api/cron"] as const;
+
 export const MIN_PASSWORD_LENGTH = 8;

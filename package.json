@@ -9,7 +9,7 @@
     "lint": "eslint",
     "db:reset": "supabase db reset",
     "db:push": "supabase db push",
-    "similarity:batch": "npx --yes tsx scripts/recalculate-similarities.ts"
+    "similarity:batch": "node --env-file=.env.local --import tsx scripts/recalculate-similarities.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -31,6 +31,7 @@
     "eslint-config-next": "16.2.9",
     "supabase": "^2.107.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   }
 }

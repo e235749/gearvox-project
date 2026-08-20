@@ -31,6 +31,10 @@ cp .env.local.example .env.local
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase プロジェクト URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
 | `NEXT_PUBLIC_SITE_URL` | アプリの公開 URL（OAuth リダイレクト用。本番は Vercel の URL） |
+| `SUPABASE_SERVICE_ROLE_KEY` | 類似度バッチ用（service_role secret） |
+| `CRON_SECRET` | 夜間 cron API 認証用 |
+
+本番デプロイ・QA の詳細は [docs/phase1-production-qa.md](docs/phase1-production-qa.md) を参照。
 
 ### 3. Supabase Auth 設定
 
@@ -99,9 +103,9 @@ src/
 | 1 | Supabase テーブル・RLS・Storage | ✅ マイグレーション作成済み |
 | 2 | Next.js プロジェクト構成 | ✅ 完了 |
 | 3 | 認証（Google/Apple/メール） | ✅ 完了 |
-| 4 | コア画面の実装 | ⬜ プレースホルダーのみ |
-| 5 | コンテキストアンケート | ⬜ ストアのみ |
-| 6 | 類似度スコアのバッチ処理 | ⬜ 未着手 |
+| 4 | コア画面・SNS・レビュー | ✅ MVP 実装済み |
+| 5 | コンテキストアンケート・類似度 | ✅ 実装済み |
+| 6 | 本番デプロイ・QA | 🔄 進行中（[Phase 1 手順書](docs/phase1-production-qa.md)） |
 
 ## デザイン方針
 
