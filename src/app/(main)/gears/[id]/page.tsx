@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { GearReviewFeedList } from "@/components/gears/gear-review-feed-list";
 import { GearStatusBadge } from "@/components/gears/gear-status-badge";
-import { ReviewListCard } from "@/components/reviews/review-list-card";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { getGearById } from "@/lib/gears/get-gear";
 import {
   getGearReviewStats,
   listReviewsByGearId,
 } from "@/lib/gears/list-gear-reviews";
+import { HOME_FEED_LIMIT } from "@/lib/reviews/constants";
 import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
 import { loadSimilarityDisplaysForReviewAuthors } from "@/lib/similarity/load-review-author-similarities";
 import { createClient } from "@/lib/supabase/server";
@@ -28,7 +30,7 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
 
   const [gear, reviews, stats] = await Promise.all([
     getGearById(id),
-    listReviewsByGearId(id),
+    listReviewsByGearId(id, HOME_FEED_LIMIT, 0),
     getGearReviewStats(id),
   ]);
   const engagements = await loadEngagementsForReviews(reviews, user?.id);
@@ -49,7 +51,7 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
         <p className="text-sm text-muted">ギア詳細</p>
         <div className="flex gap-4">
           {gear.image_url ? (
-            <img
+            <OptimizedImage
               src={gear.image_url}
               alt=""
               width={96}
@@ -73,7 +75,7 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
             ) : null}
             {gear.category ? (
               <Link
-                href={`/search?category=${gear.category.id}`}
+                href={`/?category=${gear.category.id}`}
                 className="inline-block rounded-full border border-border px-2 py-0.5 text-xs text-muted transition-colors hover:border-accent/50 hover:text-accent"
               >
                 {gear.category.name}
@@ -118,17 +120,13 @@ export default async function GearDetailPage({ params }: GearDetailPageProps) {
             </Link>
           </div>
         ) : (
-          <ul className="space-y-3">
-            {reviews.map((review) => (
-              <ReviewListCard
-                key={review.id}
-                review={review}
-                engagement={engagements[review.id]}
-                authorSimilarity={authorSimilarities[review.author.id]}
-                currentUserId={user?.id ?? null}
-              />
-            ))}
-          </ul>
+          <GearReviewFeedList
+            gearId={id}
+            initialReviews={reviews}
+            initialEngagements={engagements}
+            initialAuthorSimilarities={authorSimilarities}
+            currentUserId={user?.id ?? null}
+          />
         )}
       </section>
     </section>

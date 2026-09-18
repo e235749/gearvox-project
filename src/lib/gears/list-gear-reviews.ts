@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { HOME_FEED_LIMIT, truncateReviewBody } from "@/lib/reviews/constants";
 import { mapReviewImages } from "@/lib/reviews/map-review-images";
 
 import type { GearReviewListItem, GearReviewStats } from "@/lib/gears/types";
@@ -19,6 +20,8 @@ type ReviewRow = {
 
 export async function listReviewsByGearId(
   gearId: string,
+  limit = HOME_FEED_LIMIT,
+  offset = 0,
 ): Promise<GearReviewListItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -28,7 +31,8 @@ export async function listReviewsByGearId(
     )
     .eq("gear_id", gearId)
     .eq("is_deleted", false)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1);
 
   if (error) {
     console.error("listReviewsByGearId:", error.message);
@@ -38,17 +42,17 @@ export async function listReviewsByGearId(
   return ((data ?? []) as ReviewRow[])
     .filter((review) => review.users !== null)
     .map((review) => ({
-    id: review.id,
-    title: review.title,
-    body: review.body,
-    rating: review.rating,
-    created_at: review.created_at,
-    author: {
-      id: review.users!.id,
-      display_name: review.users!.display_name,
-    },
-    images: mapReviewImages(review.review_images),
-  }));
+      id: review.id,
+      title: review.title,
+      bodyPreview: truncateReviewBody(review.body),
+      rating: review.rating,
+      created_at: review.created_at,
+      author: {
+        id: review.users!.id,
+        display_name: review.users!.display_name,
+      },
+      images: mapReviewImages(review.review_images),
+    }));
 }
 
 export async function getGearReviewStats(

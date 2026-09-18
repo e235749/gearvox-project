@@ -3,10 +3,12 @@ import { notFound, redirect } from "next/navigation";
 
 import { BlockButton } from "@/components/users/block-button";
 import { FollowButton } from "@/components/users/follow-button";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import { ReviewListCard } from "@/components/reviews/review-list-card";
 import { formatContextSummaryLines } from "@/lib/context/format-context-summary";
 import { getUserContextSummary } from "@/lib/context/get-user-context";
 import { isFollowing } from "@/lib/follows/is-following";
+import { PROFILE_REVIEW_PREVIEW_LIMIT } from "@/lib/reviews/constants";
 import { listReviewsByUserId } from "@/lib/reviews/list-user-reviews";
 import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
 import {
@@ -43,7 +45,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   }
 
   const [reviews, following, contextSummary] = await Promise.all([
-    listReviewsByUserId(id),
+    listReviewsByUserId(id, PROFILE_REVIEW_PREVIEW_LIMIT, 0),
     user ? isFollowing(user.id, id) : Promise.resolve(false),
     !isProfilePrivate(profile) && profile.is_context_public
       ? getUserContextSummary(id)
@@ -63,7 +65,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           <p className="text-sm text-muted">プロフィール</p>
           <div className="flex items-center gap-4">
             {!isProfilePrivate(profile) && profile.avatar_url ? (
-              <img
+              <OptimizedImage
                 src={profile.avatar_url}
                 alt=""
                 width={64}
@@ -140,18 +142,26 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <h2 className="text-lg font-semibold tracking-tight">投稿したレビュー</h2>
 
         {reviews.length > 0 ? (
-          <ul className="space-y-3">
-            {reviews.map((review) => (
-              <ReviewListCard
-                key={review.id}
-                review={review}
-                gear={review.gear}
-                showAuthor={false}
-                engagement={engagements[review.id]}
-                currentUserId={user?.id ?? null}
-              />
-            ))}
-          </ul>
+          <div className="space-y-3">
+            <ul className="space-y-3">
+              {reviews.map((review) => (
+                <ReviewListCard
+                  key={review.id}
+                  review={review}
+                  gear={review.gear}
+                  showAuthor={false}
+                  engagement={engagements[review.id]}
+                  currentUserId={user?.id ?? null}
+                />
+              ))}
+            </ul>
+            <Link
+              href={`/users/${id}/reviews`}
+              className="block w-full rounded-lg border border-border bg-surface px-4 py-3 text-center text-sm text-accent transition-colors hover:border-accent/50"
+            >
+              投稿一覧を見る
+            </Link>
+          </div>
         ) : (
           <div className="rounded-lg border border-border bg-surface p-4 text-sm text-muted">
             まだレビューを投稿していません。

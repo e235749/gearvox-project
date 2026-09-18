@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import type { ReviewListImage } from "@/lib/reviews/map-review-images";
 import { getReviewImagePublicUrl } from "@/lib/reviews/review-image-url";
 
@@ -20,9 +21,12 @@ export function ReviewImageStrip({ reviewId, images }: ReviewImageStripProps) {
         href={`/reviews/${reviewId}`}
         className="block overflow-hidden rounded-lg"
       >
-        <img
+        <OptimizedImage
           src={getReviewImagePublicUrl(image.storage_path)}
           alt=""
+          width={800}
+          height={600}
+          sizes="(max-width: 512px) 100vw, 512px"
           className="aspect-[4/3] w-full object-cover"
         />
       </Link>
@@ -37,11 +41,12 @@ export function ReviewImageStrip({ reviewId, images }: ReviewImageStripProps) {
           href={`/reviews/${reviewId}`}
           className="shrink-0 overflow-hidden rounded-lg"
         >
-          <img
+          <OptimizedImage
             src={getReviewImagePublicUrl(image.storage_path)}
             alt=""
-            width={176}
-            height={176}
+            width={352}
+            height={352}
+            sizes="176px"
             className="h-44 w-44 object-cover"
           />
         </Link>

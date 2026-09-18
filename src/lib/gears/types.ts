@@ -22,7 +22,7 @@ export type GearDetail = Pick<
 export type GearReviewListItem = {
   id: string;
   title: string | null;
-  body: string;
+  bodyPreview: string;
   rating: number;
   created_at: string;
   author: {

@@ -10,6 +10,7 @@ import { listSimilarUsersForProfile } from "@/lib/similarity/list-similar-users"
 import { formatContextSummaryLines } from "@/lib/context/format-context-summary";
 import { getUserContextSummary } from "@/lib/context/get-user-context";
 import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
+import { PROFILE_REVIEW_PREVIEW_LIMIT } from "@/lib/reviews/constants";
 import { listReviewsByUserId } from "@/lib/reviews/list-user-reviews";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -27,7 +28,9 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
 
   const profile = user ? await getUserProfile(user.id) : null;
-  const reviews = user ? await listReviewsByUserId(user.id) : [];
+  const reviews = user
+    ? await listReviewsByUserId(user.id, PROFILE_REVIEW_PREVIEW_LIMIT, 0)
+    : [];
   const blockedUsers = user ? await listBlockedUsers() : [];
   const similarUsers = user ? await listSimilarUsersForProfile(user.id) : [];
   const engagements = await loadEngagementsForReviews(reviews, user?.id);
@@ -164,18 +167,26 @@ export default async function ProfilePage() {
         </div>
 
         {reviews.length > 0 ? (
-          <ul className="space-y-3">
-            {reviews.map((review) => (
-              <ReviewListCard
-                key={review.id}
-                review={review}
-                gear={review.gear}
-                showAuthor={false}
-                engagement={engagements[review.id]}
-                currentUserId={user?.id ?? null}
-              />
-            ))}
-          </ul>
+          <div className="space-y-3">
+            <ul className="space-y-3">
+              {reviews.map((review) => (
+                <ReviewListCard
+                  key={review.id}
+                  review={review}
+                  gear={review.gear}
+                  showAuthor={false}
+                  engagement={engagements[review.id]}
+                  currentUserId={user?.id ?? null}
+                />
+              ))}
+            </ul>
+            <Link
+              href="/profile/reviews"
+              className="block w-full rounded-lg border border-border bg-surface px-4 py-3 text-center text-sm text-accent transition-colors hover:border-accent/50"
+            >
+              投稿一覧を見る
+            </Link>
+          </div>
         ) : (
           <div className="rounded-lg border border-border bg-surface p-4 text-sm text-muted">
             <p>まだレビューを投稿していません。</p>
