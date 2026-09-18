@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 
 import { ReviewListCard } from "@/components/reviews/review-list-card";
 import {
@@ -58,6 +58,19 @@ export function ReviewFeedList({
   );
   const [hasMore, setHasMore] = useState(initialReviews.length >= initialLimit);
   const [isPending, startTransition] = useTransition();
+
+  // 簡単検索などで server から新しい一覧が来たら state を同期する
+  useEffect(() => {
+    setReviews(initialReviews);
+    setEngagements(initialEngagements);
+    setAuthorSimilarities(initialAuthorSimilarities);
+    setHasMore(initialReviews.length >= initialLimit);
+  }, [
+    initialReviews,
+    initialEngagements,
+    initialAuthorSimilarities,
+    initialLimit,
+  ]);
 
   function handleLoadMore() {
     startTransition(async () => {

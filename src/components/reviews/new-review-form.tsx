@@ -39,9 +39,12 @@ export function NewReviewForm({ gears: initialGears, categories }: NewReviewForm
     });
   }
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setError(null);
     setIsPending(true);
+
+    const formData = new FormData(event.currentTarget);
 
     try {
       const rawImages = formData
@@ -58,23 +61,32 @@ export function NewReviewForm({ gears: initialGears, categories }: NewReviewForm
 
       if (result.success && result.reviewId) {
         router.push(`/reviews/${result.reviewId}`);
+        router.refresh();
         return;
       }
 
       setError(result.error ?? "投稿に失敗しました。");
     } catch (submitError) {
-      setError(
+      const message =
         submitError instanceof Error
           ? submitError.message
-          : "投稿に失敗しました。",
-      );
+          : "投稿に失敗しました。";
+
+      // Next.js Server Action のプロトコル崩れ時の汎用メッセージを分かりやすくする
+      if (message.includes("unexpected response")) {
+        setError(
+          "サーバーからの応答が不正でした。画像サイズを小さくするか、再ログイン後にもう一度お試しください。",
+        );
+      } else {
+        setError(message);
+      }
     } finally {
       setIsPending(false);
     }
   }
 
   return (
-    <form action={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error ? <AuthAlert message={error} /> : null}
 
       <input type="hidden" name="gear_id" value={selectedGearId ?? ""} />

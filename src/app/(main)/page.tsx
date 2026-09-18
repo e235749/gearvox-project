@@ -103,6 +103,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </p>
           ) : null}
           <ReviewFeedList
+            key={`filtered-${categoryId ?? "all"}-${brandFilter ?? "all"}`}
             initialReviews={latestOrFiltered}
             initialEngagements={engagements}
             initialAuthorSimilarities={authorSimilarities}
@@ -116,7 +117,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <div className="space-y-3 rounded-lg border border-border bg-surface p-4 text-sm">
                 <p className="text-muted">
                   {hasSimpleFilter
-                    ? "条件に一致するレビューがありません。"
+                    ? "条件に一致するレビューがありません。カテゴリまたはブランドを変えてみてください。"
                     : "まだレビューがありません。"}
                 </p>
                 <Link href="/reviews/new" className="text-accent hover:underline">

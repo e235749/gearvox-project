@@ -91,6 +91,23 @@ export async function createReview(
   _prevState: ReviewActionResult | null,
   formData: FormData,
 ): Promise<ReviewActionResult> {
+  try {
+    return await createReviewInner(formData);
+  } catch (error) {
+    console.error("[createReview] unexpected error:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? `投稿処理中にエラーが発生しました: ${error.message}`
+          : "投稿処理中に予期しないエラーが発生しました。",
+    };
+  }
+}
+
+async function createReviewInner(
+  formData: FormData,
+): Promise<ReviewActionResult> {
   const input = parseCreateReviewForm(formData);
 
   logCreateReview("parsed input", {
@@ -224,10 +241,12 @@ export async function createReview(
     return {
       success: false,
       error: `レビューは作成されましたが、画像の保存に失敗しました: ${imageError}`,
+      reviewId,
     };
   }
 
-  revalidatePath("/reviews/new");
+  // revalidatePath は Server Action の応答を壊すことがあるため、
+  // 遷移先はクライアント側の router.refresh() に任せる
   logCreateReview("complete", { reviewId });
   return { success: true, reviewId };
 }

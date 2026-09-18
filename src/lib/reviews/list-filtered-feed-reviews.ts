@@ -14,6 +14,12 @@ export type FeedReviewFilter = {
   offset?: number;
 };
 
+/**
+ * 簡単検索: カテゴリとブランドは AND 条件。
+ * - 両方指定 → 両方に一致するギアのレビュー
+ * - 片方のみ → その条件だけで絞る（もう一方は「すべて」）
+ * - どちらもなし → 全件
+ */
 export async function listFilteredFeedReviews(
   filter: FeedReviewFilter = {},
 ): Promise<FeedReviewListItem[]> {
@@ -24,6 +30,7 @@ export async function listFilteredFeedReviews(
 
   const supabase = await createClient();
 
+  // フィルタなし
   if (!categoryId && !brand) {
     const { data, error } = await supabase
       .from("reviews")
@@ -40,6 +47,7 @@ export async function listFilteredFeedReviews(
     return mapFeedReviewRows((data ?? []) as FeedReviewRow[]);
   }
 
+  // AND: 指定された条件だけを積み上げる（未指定側は制限しない）
   let gearQuery = supabase.from("gears").select("id");
 
   if (categoryId) {
@@ -65,20 +73,38 @@ export async function listFilteredFeedReviews(
     return [];
   }
 
-  const { data, error } = await supabase
-    .from("reviews")
-    .select(FEED_REVIEW_SELECT)
-    .eq("is_deleted", false)
-    .in("gear_id", gearIds)
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
-
-  if (error) {
-    console.error("listFilteredFeedReviews:", error.message);
-    return [];
+  // PostgREST の in() は件数上限があるため、多すぎる場合はチャンクする
+  const chunkSize = 100;
+  const chunks: string[][] = [];
+  for (let i = 0; i < gearIds.length; i += chunkSize) {
+    chunks.push(gearIds.slice(i, i + chunkSize));
   }
 
-  return mapFeedReviewRows((data ?? []) as FeedReviewRow[]);
+  const collected: FeedReviewRow[] = [];
+
+  for (const chunk of chunks) {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select(FEED_REVIEW_SELECT)
+      .eq("is_deleted", false)
+      .in("gear_id", chunk)
+      .order("created_at", { ascending: false })
+      .range(0, offset + limit - 1);
+
+    if (error) {
+      console.error("listFilteredFeedReviews:", error.message);
+      return [];
+    }
+
+    collected.push(...((data ?? []) as FeedReviewRow[]));
+  }
+
+  const sorted = collected.sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  return mapFeedReviewRows(sorted.slice(offset, offset + limit));
 }
 
 export async function listDistinctGearBrands(): Promise<string[]> {

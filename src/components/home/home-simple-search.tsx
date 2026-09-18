@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useTransition } from "react";
+import { useTransition } from "react";
 
 import type { GearCategoryItem } from "@/lib/gears/types";
 
@@ -23,46 +23,33 @@ export function HomeSimpleSearch({
 
   const hasFilter = Boolean(selectedCategoryId || selectedBrand);
 
-  const queryString = useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString());
-    return params;
-  }, [searchParams]);
-
-  function updateFilter(next: { category?: string; brand?: string }) {
-    const params = new URLSearchParams(queryString.toString());
-
-    if (next.category !== undefined) {
-      if (next.category) {
-        params.set("category", next.category);
-      } else {
-        params.delete("category");
-      }
-    }
-
-    if (next.brand !== undefined) {
-      if (next.brand) {
-        params.set("brand", next.brand);
-      } else {
-        params.delete("brand");
-      }
-    }
-
-    // フィルタ変更時は新着タブを維持しつつ following 指定は残す
-    const qs = params.toString();
-    startTransition(() => {
-      router.push(qs ? `/?${qs}` : "/");
-    });
-  }
-
-  function clearFilters() {
+  function pushFilters(next: {
+    category?: string;
+    brand?: string;
+    clearAll?: boolean;
+  }) {
     const params = new URLSearchParams();
-    const tab = searchParams.get("tab");
-    if (tab === "following") {
-      params.set("tab", "following");
+
+    if (!next.clearAll) {
+      const category =
+        next.category !== undefined ? next.category : selectedCategoryId;
+      const brand = next.brand !== undefined ? next.brand : selectedBrand;
+
+      if (category) {
+        params.set("category", category);
+      }
+      if (brand) {
+        params.set("brand", brand);
+      }
     }
+
+    // 簡単検索の結果は常に「新着」タブで表示（AND 絞り込み対象）
+    params.set("tab", "latest");
+
     const qs = params.toString();
     startTransition(() => {
-      router.push(qs ? `/?${qs}` : "/");
+      router.push(qs ? `/?${qs}` : "/?tab=latest");
+      router.refresh();
     });
   }
 
@@ -72,13 +59,13 @@ export function HomeSimpleSearch({
         <div>
           <h2 className="text-sm font-medium">簡単検索</h2>
           <p className="text-xs text-muted">
-            カテゴリやブランドで、表示するレビューを絞り込めます
+            カテゴリとブランドは両方指定すると AND（両方一致）で絞り込みます。片方だけでも検索できます。
           </p>
         </div>
         {hasFilter ? (
           <button
             type="button"
-            onClick={clearFilters}
+            onClick={() => pushFilters({ clearAll: true })}
             disabled={isPending}
             className="shrink-0 text-xs text-accent hover:underline disabled:opacity-60"
           >
@@ -92,7 +79,7 @@ export function HomeSimpleSearch({
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => updateFilter({ category: "" })}
+            onClick={() => pushFilters({ category: "" })}
             disabled={isPending}
             className={`rounded-full border px-3 py-1 text-xs transition-colors ${
               !selectedCategoryId
@@ -106,7 +93,7 @@ export function HomeSimpleSearch({
             <button
               key={category.id}
               type="button"
-              onClick={() => updateFilter({ category: category.id })}
+              onClick={() => pushFilters({ category: category.id })}
               disabled={isPending}
               className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                 selectedCategoryId === category.id
@@ -129,7 +116,7 @@ export function HomeSimpleSearch({
             id="home-brand-filter"
             value={selectedBrand}
             disabled={isPending}
-            onChange={(event) => updateFilter({ brand: event.target.value })}
+            onChange={(event) => pushFilters({ brand: event.target.value })}
             className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           >
             <option value="">すべて</option>
