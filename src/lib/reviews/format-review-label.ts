@@ -1,16 +1,15 @@
+import { truncateReviewBody } from "@/lib/reviews/constants";
+
+/** @deprecated 一覧では title + bodyPreview を別表示する */
 export function formatReviewHeadline(
   title: string | null,
   body: string,
-  maxLength = 80,
+  maxLength = 40,
 ): string {
   if (title?.trim()) {
     return title;
   }
-  const trimmed = body.trim();
-  if (trimmed.length <= maxLength) {
-    return trimmed;
-  }
-  return `${trimmed.slice(0, maxLength)}…`;
+  return truncateReviewBody(body, maxLength);
 }
 
 export function formatReviewDate(value: string): string {

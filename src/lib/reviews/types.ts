@@ -33,7 +33,8 @@ export type ReviewDetail = {
 export type FeedReviewListItem = {
   id: string;
   title: string | null;
-  body: string;
+  /** 一覧用。本文先頭40文字（全文ではない） */
+  bodyPreview: string;
   rating: number;
   created_at: string;
   author: {

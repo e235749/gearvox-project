@@ -105,7 +105,8 @@ src/
 | 3 | 認証（Google/Apple/メール） | ✅ 完了 |
 | 4 | コア画面・SNS・レビュー | ✅ MVP 実装済み |
 | 5 | コンテキストアンケート・類似度 | ✅ 実装済み |
-| 6 | 本番デプロイ・QA | 🔄 進行中（[Phase 1 手順書](docs/phase1-production-qa.md)） |
+| 6 | 本番デプロイ・QA | ✅ Phase 1 完了 |
+| 7 | カテゴリ拡充・速度・検索二分化 | ✅ 実装済み（[仕様書](docs/v1-feature-spec-abc.md)） |
 
 ## デザイン方針
 

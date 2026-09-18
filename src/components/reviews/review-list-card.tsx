@@ -4,10 +4,7 @@ import { ReviewEngagement } from "@/components/reviews/review-engagement";
 import { SimilarityBadge } from "@/components/similarity/similarity-badge";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
 import { ReviewImageStrip } from "@/components/reviews/review-image-strip";
-import {
-  formatReviewDate,
-  formatReviewHeadline,
-} from "@/lib/reviews/format-review-label";
+import { formatReviewDate } from "@/lib/reviews/format-review-label";
 import type { ReviewEngagementSummary } from "@/lib/reviews/engagement-types";
 import type { SimilarityDisplay } from "@/lib/similarity/types";
 import type { ReviewListImage } from "@/lib/reviews/map-review-images";
@@ -16,7 +13,7 @@ interface ReviewListCardProps {
   review: {
     id: string;
     title: string | null;
-    body: string;
+    bodyPreview: string;
     rating: number;
     created_at: string;
     author: {
@@ -50,6 +47,8 @@ export function ReviewListCard({
     commentCount: 0,
     isLikedByUser: false,
   };
+
+  const headline = review.title?.trim() || null;
 
   return (
     <li className="rounded-lg border border-border bg-surface px-4 py-3 text-sm">
@@ -87,9 +86,18 @@ export function ReviewListCard({
           </p>
           <Link
             href={`/reviews/${review.id}`}
-            className="block leading-relaxed transition-colors hover:text-accent"
+            className="block space-y-1 transition-colors hover:text-accent"
           >
-            {formatReviewHeadline(review.title, review.body)}
+            {headline ? (
+              <p className="font-medium leading-relaxed">{headline}</p>
+            ) : null}
+            {review.bodyPreview ? (
+              <p
+                className={`leading-relaxed ${headline ? "text-muted" : ""}`}
+              >
+                {review.bodyPreview}
+              </p>
+            ) : null}
           </Link>
         </div>
         <ReviewImageStrip reviewId={review.id} images={review.images} />

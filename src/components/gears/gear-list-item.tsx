@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { GearStatusBadge } from "@/components/gears/gear-status-badge";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 import type { GearListItem } from "@/lib/gears/types";
 
 interface GearListItemCardProps {
@@ -15,11 +16,12 @@ export function GearListItemCard({ gear }: GearListItemCardProps) {
         className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm transition-colors hover:border-accent/50"
       >
         {gear.image_url ? (
-          <img
+          <OptimizedImage
             src={gear.image_url}
             alt=""
             width={48}
             height={48}
+            sizes="48px"
             className="h-12 w-12 rounded-md object-cover"
           />
         ) : (
