@@ -4,6 +4,8 @@ export type ReviewActionResult = {
   success: boolean;
   error?: string;
   reviewId?: string;
+  /** 編集時: 追加アップロードの開始 display_order */
+  existingImageCount?: number;
 };
 
 export type ReviewDetail = {

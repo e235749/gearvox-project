@@ -8,10 +8,8 @@ import { GearSelector } from "@/components/reviews/gear-selector";
 import { ImageUploadInput } from "@/components/reviews/image-upload-input";
 import { StarRatingInput } from "@/components/reviews/star-rating-input";
 import { createReview } from "@/lib/reviews/actions";
-import {
-  prepareReviewImagesForUpload,
-  replaceReviewImagesInFormData,
-} from "@/lib/reviews/prepare-review-images";
+import { prepareReviewImagesForUpload } from "@/lib/reviews/prepare-review-images";
+import { uploadReviewImagesFromClient } from "@/lib/reviews/upload-review-images-client";
 import type { GearCategoryItem, GearListItem } from "@/lib/gears/types";
 
 interface NewReviewFormProps {
@@ -44,14 +42,21 @@ export function NewReviewForm({ gears: initialGears, categories }: NewReviewForm
     setError(null);
     setIsPending(true);
 
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
     try {
       const rawImages = formData
         .getAll("images")
         .filter((entry): entry is File => entry instanceof File && entry.size > 0);
-      const preparedImages = await prepareReviewImagesForUpload(rawImages);
-      replaceReviewImagesInFormData(formData, preparedImages);
+
+      // Server Action には画像を送らない（Vercel ボディ制限回避）
+      formData.delete("images");
+
+      const preparedImages =
+        rawImages.length > 0
+          ? await prepareReviewImagesForUpload(rawImages)
+          : [];
 
       const result = await createReview(null, formData);
 
@@ -59,23 +64,38 @@ export function NewReviewForm({ gears: initialGears, categories }: NewReviewForm
         console.info("[NewReviewForm] result", result);
       }
 
-      if (result.success && result.reviewId) {
-        router.push(`/reviews/${result.reviewId}`);
-        router.refresh();
+      if (!result.success || !result.reviewId) {
+        setError(result.error ?? "投稿に失敗しました。");
         return;
       }
 
-      setError(result.error ?? "投稿に失敗しました。");
+      if (preparedImages.length > 0) {
+        const upload = await uploadReviewImagesFromClient(
+          result.reviewId,
+          preparedImages,
+        );
+
+        if (upload.error) {
+          setError(
+            `レビューは作成されましたが、画像の保存に失敗しました: ${upload.error}`,
+          );
+          router.push(`/reviews/${result.reviewId}`);
+          router.refresh();
+          return;
+        }
+      }
+
+      router.push(`/reviews/${result.reviewId}`);
+      router.refresh();
     } catch (submitError) {
       const message =
         submitError instanceof Error
           ? submitError.message
           : "投稿に失敗しました。";
 
-      // Next.js Server Action のプロトコル崩れ時の汎用メッセージを分かりやすくする
       if (message.includes("unexpected response")) {
         setError(
-          "サーバーからの応答が不正でした。画像サイズを小さくするか、再ログイン後にもう一度お試しください。",
+          "サーバーからの応答が不正でした。再ログイン後にもう一度お試しください。",
         );
       } else {
         setError(message);

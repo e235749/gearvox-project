@@ -8,10 +8,8 @@ import { ImageUploadInput } from "@/components/reviews/image-upload-input";
 import { StarRatingInput } from "@/components/reviews/star-rating-input";
 import { MAX_REVIEW_IMAGES } from "@/lib/reviews/constants";
 import { updateReview } from "@/lib/reviews/actions";
-import {
-  prepareReviewImagesForUpload,
-  replaceReviewImagesInFormData,
-} from "@/lib/reviews/prepare-review-images";
+import { prepareReviewImagesForUpload } from "@/lib/reviews/prepare-review-images";
+import { uploadReviewImagesFromClient } from "@/lib/reviews/upload-review-images-client";
 import { getReviewImagePublicUrl } from "@/lib/reviews/review-image-url";
 import type { ReviewDetail } from "@/lib/reviews/types";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
@@ -30,26 +28,58 @@ export function EditReviewForm({ review }: EditReviewFormProps) {
   const remainingImageSlots = MAX_REVIEW_IMAGES - review.images.length;
   const canSubmit = rating >= 1;
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setError(null);
     setIsPending(true);
+
+    const formData = new FormData(event.currentTarget);
 
     try {
       const rawImages = formData
         .getAll("images")
         .filter((entry): entry is File => entry instanceof File && entry.size > 0);
-      const preparedImages = await prepareReviewImagesForUpload(rawImages);
-      replaceReviewImagesInFormData(formData, preparedImages);
 
-      const result = await updateReview(null, formData);
+      formData.delete("images");
 
-      if (result.success && result.reviewId) {
-        router.push(`/reviews/${result.reviewId}`);
-        router.refresh();
+      const preparedImages =
+        rawImages.length > 0
+          ? await prepareReviewImagesForUpload(rawImages)
+          : [];
+
+      if (preparedImages.length > remainingImageSlots) {
+        setError(`画像は最大${MAX_REVIEW_IMAGES}枚まで添付できます。`);
         return;
       }
 
-      setError(result.error ?? "更新に失敗しました。");
+      const result = await updateReview(null, formData);
+
+      if (!result.success || !result.reviewId) {
+        setError(result.error ?? "更新に失敗しました。");
+        return;
+      }
+
+      if (preparedImages.length > 0) {
+        const startOrder =
+          result.existingImageCount ?? review.images.length;
+        const upload = await uploadReviewImagesFromClient(
+          result.reviewId,
+          preparedImages,
+          startOrder,
+        );
+
+        if (upload.error) {
+          setError(
+            `レビューは更新されましたが、画像の保存に失敗しました: ${upload.error}`,
+          );
+          router.push(`/reviews/${result.reviewId}`);
+          router.refresh();
+          return;
+        }
+      }
+
+      router.push(`/reviews/${result.reviewId}`);
+      router.refresh();
     } catch (submitError) {
       setError(
         submitError instanceof Error
@@ -62,7 +92,7 @@ export function EditReviewForm({ review }: EditReviewFormProps) {
   }
 
   return (
-    <form action={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {error ? <AuthAlert message={error} /> : null}
 
       <input type="hidden" name="review_id" value={review.id} />
