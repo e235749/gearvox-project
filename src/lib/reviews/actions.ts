@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 
 import { buildContextSnapshot } from "@/lib/reviews/build-context-snapshot";
 import type { ReviewActionResult } from "@/lib/reviews/types";
-import { uploadReviewImages } from "@/lib/reviews/upload-review-images";
 import {
   parseCreateReviewForm,
   parseUpdateReviewForm,
@@ -117,7 +116,11 @@ async function createReviewInner(
     imageCount: input.images.length,
   });
 
-  const validationError = validateCreateReviewInput(input);
+  // 画像はクライアントから Storage 直送するため、Server Action では検証しない
+  const validationError = validateCreateReviewInput({
+    ...input,
+    images: [],
+  });
   if (validationError) {
     logCreateReview("validation failed", { validationError });
     return { success: false, error: validationError };
@@ -230,23 +233,7 @@ async function createReviewInner(
   const reviewId = (createdReview as { id: string }).id;
   logCreateReview("insert ok", { reviewId });
 
-  const { error: imageError } = await uploadReviewImages(
-    user.id,
-    reviewId,
-    input.images,
-  );
-
-  if (imageError) {
-    console.error("[createReview] image upload error:", imageError);
-    return {
-      success: false,
-      error: `レビューは作成されましたが、画像の保存に失敗しました: ${imageError}`,
-      reviewId,
-    };
-  }
-
-  // revalidatePath は Server Action の応答を壊すことがあるため、
-  // 遷移先はクライアント側の router.refresh() に任せる
+  // 画像アップロードはクライアント（Storage 直送）側で行う
   logCreateReview("complete", { reviewId });
   return { success: true, reviewId };
 }
@@ -311,7 +298,7 @@ export async function updateReview(
   }
 
   const validationError = validateUpdateReviewInput(
-    input,
+    { ...input, images: [] },
     existingImageCount ?? 0,
   );
   if (validationError) {
@@ -335,23 +322,11 @@ export async function updateReview(
     return { success: false, error: "レビューの更新に失敗しました。" };
   }
 
-  if (input.images.length > 0) {
-    const { error: imageError } = await uploadReviewImages(
-      auth.user.id,
-      input.reviewId,
-      input.images,
-      existingImageCount ?? 0,
-    );
-
-    if (imageError) {
-      console.error("[updateReview] image upload error:", imageError);
-      return {
-        success: false,
-        error: `レビューは更新されましたが、画像の保存に失敗しました: ${imageError}`,
-      };
-    }
-  }
-
+  // 追加画像はクライアント（Storage 直送）側で行う
   revalidateReviewPaths(input.reviewId, owned.review.gear_id);
-  return { success: true, reviewId: input.reviewId };
+  return {
+    success: true,
+    reviewId: input.reviewId,
+    existingImageCount: existingImageCount ?? 0,
+  };
 }

@@ -40,7 +40,7 @@ export function ImageUploadInput({ remainingSlots }: ImageUploadInputProps) {
           ? `あと${maxImages}枚まで追加できます（1枚${MAX_IMAGE_SIZE_MB}MBまで）`
           : `最大${maxImages}枚・1枚${MAX_IMAGE_SIZE_MB}MBまで（${getReviewImageFormatLabel()}）`}
         {" "}
-        iPhoneの写真（HEIC）は自動でJPEGに変換されます。
+        投稿時に軽い圧縮を行い、そのままストレージへ送信します。iPhoneの写真（HEIC）は自動でJPEGに変換されます。
       </p>
     </div>
   );
