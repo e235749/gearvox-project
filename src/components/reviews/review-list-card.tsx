@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 import { ReviewEngagement } from "@/components/reviews/review-engagement";
+import { ReviewImageStrip } from "@/components/reviews/review-image-strip";
+import { StarRating } from "@/components/reviews/star-rating";
 import { SimilarityBadge } from "@/components/similarity/similarity-badge";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
-import { ReviewImageStrip } from "@/components/reviews/review-image-strip";
 import { formatReviewDate } from "@/lib/reviews/format-review-label";
 import type { ReviewEngagementSummary } from "@/lib/reviews/engagement-types";
 import type { SimilarityDisplay } from "@/lib/similarity/types";
@@ -68,7 +69,7 @@ export function ReviewListCard({
             ) : (
               <span />
             )}
-            <p className="shrink-0 text-xs text-muted">{review.rating} / 5</p>
+            <StarRating value={review.rating} size="sm" className="shrink-0" />
           </div>
           <p className="text-xs text-muted">
             {gear ? (

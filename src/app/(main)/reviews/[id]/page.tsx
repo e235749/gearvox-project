@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ReviewOwnerActions } from "@/components/reviews/review-owner-actions";
 import { ReviewEngagement } from "@/components/reviews/review-engagement";
+import { StarRating } from "@/components/reviews/star-rating";
 import {
   ReportDialog,
   ReportLoginPrompt,
@@ -86,7 +87,7 @@ export default async function ReviewDetailPage({
               {review.author.display_name}
             </Link>
             <SimilarityBadge similarity={authorSimilarity} />
-            <span>{review.rating} / 5</span>
+            <StarRating value={review.rating} size="md" />
           </div>
           {user && !isOwner ? (
             <div className="flex flex-col items-end gap-2">
