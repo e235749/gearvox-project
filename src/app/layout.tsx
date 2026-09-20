@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GearVox",
   description: "キャンパー向けSNS型レビューアプリ",
+  applicationName: "GearVox",
+  appleWebApp: {
+    title: "GearVox",
+    capable: true,
+  },
 };
 
 export default function RootLayout({
