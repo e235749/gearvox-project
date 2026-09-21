@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import type { GearActionResult } from "@/lib/gears/types";
+import { resolveOutdoorBrandLabel } from "@/lib/gears/outdoor-brands";
 import {
   parseApproveGearForm,
   parseCreatePendingGearForm,
@@ -96,7 +97,7 @@ export async function createPendingGear(
 
   const payload: GearInsert = {
     name: input.name,
-    brand: input.brand || null,
+    brand: resolveOutdoorBrandLabel(input.brand) || null,
     category_id: input.categoryId,
     status: "pending",
     submitted_by: auth.user.id,
@@ -152,7 +153,7 @@ export async function approveGear(
 
   const updatePayload: GearUpdate = {
     name: input.name,
-    brand: input.brand || null,
+    brand: resolveOutdoorBrandLabel(input.brand) || null,
     category_id: input.categoryId,
     status: "approved",
   };
