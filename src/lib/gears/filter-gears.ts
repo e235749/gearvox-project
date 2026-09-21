@@ -1,4 +1,5 @@
 import type { GearListItem } from "@/lib/gears/types";
+import { outdoorBrandSearchTokens } from "@/lib/gears/outdoor-brands";
 
 export function filterGearsByKeyword(
   gears: GearListItem[],
@@ -9,14 +10,20 @@ export function filterGearsByKeyword(
     return gears;
   }
 
+  const keywordCompact = normalized.replace(/\s+/g, "");
+
   return gears.filter((gear) => {
     const name = gear.name.toLowerCase();
-    const brand = gear.brand?.toLowerCase() ?? "";
     const categoryName = gear.category_name?.toLowerCase() ?? "";
+    const brandTokens = outdoorBrandSearchTokens(gear.brand ?? "");
+
     return (
       name.includes(normalized) ||
-      brand.includes(normalized) ||
-      categoryName.includes(normalized)
+      categoryName.includes(normalized) ||
+      brandTokens.some(
+        (token) =>
+          token.includes(keywordCompact) || keywordCompact.includes(token),
+      )
     );
   });
 }

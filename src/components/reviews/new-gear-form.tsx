@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 
 import { AuthAlert } from "@/components/auth/auth-alert";
+import { BrandInput } from "@/components/gears/brand-input";
 import { GearStatusBadge } from "@/components/gears/gear-status-badge";
 import { createPendingGear } from "@/lib/gears/actions";
 import { findSimilarGears } from "@/lib/gears/find-similar-gears";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
+import { resolveOutdoorBrandLabel } from "@/lib/gears/outdoor-brands";
 import type { GearCategoryItem, GearListItem } from "@/lib/gears/types";
 
 interface NewGearFormProps {
@@ -53,10 +55,12 @@ export function NewGearForm({
 
     setIsPending(true);
 
+    const resolvedBrand = resolveOutdoorBrandLabel(brand);
+
     try {
       const formData = new FormData();
       formData.set("name", name);
-      formData.set("brand", brand);
+      formData.set("brand", resolvedBrand);
       if (categoryId) {
         formData.set("category_id", categoryId);
       }
@@ -72,7 +76,7 @@ export function NewGearForm({
       onCreated({
         id: result.gearId,
         name,
-        brand: brand || null,
+        brand: resolvedBrand || null,
         image_url: null,
         category_id: categoryId || null,
         category_name: category?.name ?? null,
@@ -116,17 +120,13 @@ export function NewGearForm({
         <label htmlFor="new-gear-brand" className="text-sm text-muted">
           ブランド名（任意）
         </label>
-        <input
+        <BrandInput
           id="new-gear-brand"
-          type="text"
           value={brand}
-          onChange={(event) => {
-            setBrand(event.target.value);
+          onChange={(next) => {
+            setBrand(next);
             setConfirmedNew(false);
           }}
-          maxLength={100}
-          placeholder="例: Snow Peak"
-          className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-accent"
         />
       </div>
 

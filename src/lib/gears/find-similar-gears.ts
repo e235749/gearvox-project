@@ -1,5 +1,34 @@
+import { outdoorBrandSearchTokens } from "@/lib/gears/outdoor-brands";
 import { normalizeGearName } from "@/lib/gears/normalize-gear-name";
 import type { GearListItem } from "@/lib/gears/types";
+
+function brandsOverlap(left: string, right: string): number {
+  const leftTokens = outdoorBrandSearchTokens(left);
+  const rightTokens = outdoorBrandSearchTokens(right);
+
+  if (leftTokens.length === 0 || rightTokens.length === 0) {
+    return 0;
+  }
+
+  for (const token of leftTokens) {
+    if (rightTokens.includes(token)) {
+      return 40;
+    }
+  }
+
+  for (const leftToken of leftTokens) {
+    for (const rightToken of rightTokens) {
+      if (
+        leftToken.includes(rightToken) ||
+        rightToken.includes(leftToken)
+      ) {
+        return 20;
+      }
+    }
+  }
+
+  return 0;
+}
 
 export function findSimilarGears(
   gears: GearListItem[],
@@ -8,7 +37,6 @@ export function findSimilarGears(
   limit = 5,
 ): GearListItem[] {
   const normalizedName = normalizeGearName(name);
-  const normalizedBrand = normalizeGearName(brand);
 
   if (!normalizedName) {
     return [];
@@ -17,7 +45,6 @@ export function findSimilarGears(
   const scored = gears
     .map((gear) => {
       const gearName = normalizeGearName(gear.name);
-      const gearBrand = normalizeGearName(gear.brand ?? "");
       let score = 0;
 
       if (gearName === normalizedName) {
@@ -29,16 +56,7 @@ export function findSimilarGears(
         score += 60;
       }
 
-      if (normalizedBrand && gearBrand) {
-        if (gearBrand === normalizedBrand) {
-          score += 40;
-        } else if (
-          gearBrand.includes(normalizedBrand) ||
-          normalizedBrand.includes(gearBrand)
-        ) {
-          score += 20;
-        }
-      }
+      score += brandsOverlap(brand, gear.brand ?? "");
 
       return { gear, score };
     })

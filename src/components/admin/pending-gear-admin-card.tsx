@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AuthAlert } from "@/components/auth/auth-alert";
+import { BrandInput } from "@/components/gears/brand-input";
 import { approveGear, mergeGear, rejectGear } from "@/lib/gears/actions";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
+import { resolveOutdoorBrandLabel } from "@/lib/gears/outdoor-brands";
 import type { GearCategoryItem, PendingGearListItem } from "@/lib/gears/types";
 
 interface PendingGearAdminCardProps {
@@ -37,7 +39,7 @@ export function PendingGearAdminCard({
       const formData = new FormData();
       formData.set("gear_id", gear.id);
       formData.set("name", name);
-      formData.set("brand", brand);
+      formData.set("brand", resolveOutdoorBrandLabel(brand));
       if (categoryId) {
         formData.set("category_id", categoryId);
       }
@@ -132,12 +134,15 @@ export function PendingGearAdminCard({
           />
         </div>
         <div className="space-y-2">
-          <label className="text-muted">ブランド名</label>
-          <input
-            type="text"
+          <label className="text-muted" htmlFor={`admin-brand-${gear.id}`}>
+            ブランド名
+          </label>
+          <BrandInput
+            id={`admin-brand-${gear.id}`}
             value={brand}
-            onChange={(event) => setBrand(event.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:border-accent"
+            onChange={setBrand}
+            showHint={false}
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
           />
         </div>
       </div>
