@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <AuthShell
       title="ログイン"
-      description="Google / Apple / メールアドレスでログインできます。"
+      description="Google またはメールアドレスでログインできます。"
     >
       {params.deleted === "1" ? (
         <p className="rounded-lg border border-accent/30 bg-accent/10 px-3 py-2 text-sm text-accent">

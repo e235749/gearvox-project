@@ -1,6 +1,6 @@
 "use client";
 
-import { IconBrandApple, IconBrandGoogle } from "@tabler/icons-react";
+import { IconBrandGoogle } from "@tabler/icons-react";
 import { useState } from "react";
 
 import { AuthAlert } from "@/components/auth/auth-alert";
@@ -13,7 +13,6 @@ const providers: Array<{
   icon: typeof IconBrandGoogle;
 }> = [
   { id: "google", label: "Googleで続ける", icon: IconBrandGoogle },
-  { id: "apple", label: "Appleで続ける", icon: IconBrandApple },
 ];
 
 export function OAuthButtons() {
