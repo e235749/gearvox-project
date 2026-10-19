@@ -1,3 +1,5 @@
+import { LEGAL_ROUTES } from "@/lib/legal/constants";
+
 export const AUTH_ROUTES = {
   login: "/login",
   signup: "/signup",
@@ -9,6 +11,8 @@ export const PUBLIC_ROUTES = [
   AUTH_ROUTES.login,
   AUTH_ROUTES.signup,
   AUTH_ROUTES.callback,
+  LEGAL_ROUTES.terms,
+  LEGAL_ROUTES.privacy,
 ] as const;
 
 /** ログイン不要で通す内部 API（ルート側で別途認証） */
