@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { DeleteAccountSection } from "@/components/profile/delete-account-section";
+import { LegalLinks } from "@/components/legal/legal-links";
 import { ContextPrivacyToggle } from "@/components/profile/context-privacy-toggle";
 import { ReviewListCard } from "@/components/reviews/review-list-card";
 import { BlockedUsersList } from "@/components/users/blocked-users-list";
@@ -204,6 +206,10 @@ export default async function ProfilePage() {
         <h2 className="text-lg font-semibold tracking-tight">ブロック中のユーザー</h2>
         <BlockedUsersList blockedUsers={blockedUsers} />
       </section>
+
+      <DeleteAccountSection />
+
+      <LegalLinks />
 
       <form action={signOut}>
         <button

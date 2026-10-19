@@ -5,6 +5,7 @@ interface LoginPageProps {
   searchParams: Promise<{
     next?: string;
     error?: string;
+    deleted?: string;
   }>;
 }
 
@@ -20,6 +21,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       title="ログイン"
       description="Google / Apple / メールアドレスでログインできます。"
     >
+      {params.deleted === "1" ? (
+        <p className="rounded-lg border border-accent/30 bg-accent/10 px-3 py-2 text-sm text-accent">
+          アカウントを削除しました。
+        </p>
+      ) : null}
       <EmailLoginForm next={params.next} initialError={initialError} />
     </AuthShell>
   );

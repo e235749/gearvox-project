@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { AuthAlert } from "@/components/auth/auth-alert";
 import { AuthDivider } from "@/components/auth/auth-divider";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { LegalLinks } from "@/components/legal/legal-links";
 import { signupWithEmail } from "@/lib/auth/actions";
 import { MIN_PASSWORD_LENGTH } from "@/lib/auth/constants";
 
@@ -72,6 +73,10 @@ export function EmailSignupForm() {
           />
         </div>
 
+        <p className="text-xs leading-5 text-muted">
+          会員登録すると、利用規約とプライバシーポリシーに同意したものとみなします。
+        </p>
+
         <button
           type="submit"
           disabled={isPending}
@@ -80,6 +85,8 @@ export function EmailSignupForm() {
           {isPending ? "登録中..." : "会員登録"}
         </button>
       </form>
+
+      <LegalLinks />
 
       <p className="text-center text-sm text-muted">
         既にアカウントをお持ちの方は{" "}

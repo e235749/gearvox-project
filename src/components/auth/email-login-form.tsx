@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { AuthAlert } from "@/components/auth/auth-alert";
 import { AuthDivider } from "@/components/auth/auth-divider";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import { LegalLinks } from "@/components/legal/legal-links";
 import { loginWithEmail } from "@/lib/auth/actions";
 
 interface EmailLoginFormProps {
@@ -72,6 +73,7 @@ export function EmailLoginForm({ next, initialError }: EmailLoginFormProps) {
           会員登録
         </Link>
       </p>
+      <LegalLinks />
     </div>
   );
 }
