@@ -5,6 +5,7 @@ import { ContextPromptBanner } from "@/components/context/context-prompt-banner"
 import { FollowingReviewsPanel } from "@/components/home/following-reviews-panel";
 import { HomeFeedTabs } from "@/components/home/home-feed-tabs";
 import { HomeSimpleSearch } from "@/components/home/home-simple-search";
+import { ReviewCountSummary } from "@/components/home/review-count-summary";
 import { ReviewFeedList } from "@/components/reviews/review-feed-list";
 import { hasCompletedContextQuestionnaire } from "@/lib/context/get-user-context";
 import { listFollowingIds } from "@/lib/follows/is-following";
@@ -14,6 +15,7 @@ import {
   parseHomeFeedTab,
   type HomeFeedTab,
 } from "@/lib/reviews/constants";
+import { getReviewCountSummary } from "@/lib/reviews/count-reviews";
 import { loadEngagementsForReviews } from "@/lib/reviews/get-review-engagements";
 import {
   listDistinctGearBrands,
@@ -41,10 +43,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [categories, brands, showContextPrompt] = await Promise.all([
+  const [categories, brands, showContextPrompt, reviewCounts] = await Promise.all([
     listGearCategories(),
     listDistinctGearBrands(),
     user ? hasCompletedContextQuestionnaire(user.id).then((done) => !done) : false,
+    getReviewCountSummary(),
   ]);
 
   const [latestOrFiltered, followingReviews, followingIds] = await Promise.all([
@@ -78,6 +81,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <p className="text-sm text-muted">GearVox</p>
         <h1 className="text-2xl font-semibold tracking-tight">ホーム</h1>
       </header>
+
+      <ReviewCountSummary
+        total={reviewCounts.total}
+        addedThisMonth={reviewCounts.addedThisMonth}
+      />
 
       <Suspense fallback={null}>
         <HomeSimpleSearch categories={categories} brands={brands} />
