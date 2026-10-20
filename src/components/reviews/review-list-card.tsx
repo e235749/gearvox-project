@@ -75,6 +75,13 @@ export function ReviewListCard({
             )}
             <StarRating value={review.rating} size="sm" className="shrink-0" />
           </div>
+          <ReviewContextTags
+            tags={review.contextTags ?? []}
+            isContextPublic={review.author.isContextPublic !== false}
+            authorId={review.author.id}
+            currentUserId={currentUserId}
+            limit={REVIEW_CONTEXT_TAG_PREVIEW_LIMIT}
+          />
           <p className="text-xs text-muted">
             {gear ? (
               <>
@@ -89,13 +96,6 @@ export function ReviewListCard({
             ) : null}
             {formatReviewDate(review.created_at)}
           </p>
-          <ReviewContextTags
-            tags={review.contextTags ?? []}
-            isContextPublic={review.author.isContextPublic !== false}
-            authorId={review.author.id}
-            currentUserId={currentUserId}
-            limit={REVIEW_CONTEXT_TAG_PREVIEW_LIMIT}
-          />
           <Link
             href={`/reviews/${review.id}`}
             className="block space-y-1 transition-colors hover:text-accent"
