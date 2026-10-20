@@ -1,4 +1,5 @@
 import { truncateReviewBody } from "@/lib/reviews/constants";
+import { contextTagsFromSnapshot } from "@/lib/reviews/context-tags";
 import { mapReviewImages } from "@/lib/reviews/map-review-images";
 import type { FeedReviewListItem } from "@/lib/reviews/types";
 
@@ -8,8 +9,13 @@ export type FeedReviewRow = {
   body: string;
   rating: number;
   created_at: string;
+  context_snapshot: unknown;
   gears: { id: string; name: string; brand: string | null } | null;
-  users: { id: string; display_name: string } | null;
+  users: {
+    id: string;
+    display_name: string;
+    is_context_public: boolean;
+  } | null;
   review_images: Array<{
     id: string;
     storage_path: string;
@@ -18,7 +24,7 @@ export type FeedReviewRow = {
 };
 
 export const FEED_REVIEW_SELECT =
-  "id, title, body, rating, created_at, gears(id, name, brand), users(id, display_name), review_images(id, storage_path, display_order)";
+  "id, title, body, rating, created_at, context_snapshot, gears(id, name, brand), users(id, display_name, is_context_public), review_images(id, storage_path, display_order)";
 
 export function mapFeedReviewRow(review: FeedReviewRow): FeedReviewListItem | null {
   if (!review.gears || !review.users) {
@@ -34,7 +40,9 @@ export function mapFeedReviewRow(review: FeedReviewRow): FeedReviewListItem | nu
     author: {
       id: review.users.id,
       display_name: review.users.display_name,
+      isContextPublic: review.users.is_context_public !== false,
     },
+    contextTags: contextTagsFromSnapshot(review.context_snapshot),
     gear: {
       id: review.gears.id,
       name: review.gears.name,

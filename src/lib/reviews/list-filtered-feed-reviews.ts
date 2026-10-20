@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { HOME_FEED_LIMIT } from "@/lib/reviews/constants";
+import { hidePrivateContextTags } from "@/lib/reviews/hide-private-context-tags";
 import {
   FEED_REVIEW_SELECT,
   mapFeedReviewRows,
@@ -44,7 +45,9 @@ export async function listFilteredFeedReviews(
       return [];
     }
 
-    return mapFeedReviewRows((data ?? []) as FeedReviewRow[]);
+    return hidePrivateContextTags(
+      mapFeedReviewRows((data ?? []) as FeedReviewRow[]),
+    );
   }
 
   // AND: 指定された条件だけを積み上げる（未指定側は制限しない）
@@ -104,7 +107,9 @@ export async function listFilteredFeedReviews(
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 
-  return mapFeedReviewRows(sorted.slice(offset, offset + limit));
+  return hidePrivateContextTags(
+    mapFeedReviewRows(sorted.slice(offset, offset + limit)),
+  );
 }
 
 export async function listDistinctGearBrands(): Promise<string[]> {

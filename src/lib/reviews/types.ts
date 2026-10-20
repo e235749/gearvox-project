@@ -24,7 +24,9 @@ export type ReviewDetail = {
   author: {
     id: string;
     display_name: string;
+    isContextPublic: boolean;
   };
+  contextTags: string[];
   images: Array<{
     id: string;
     storage_path: string;
@@ -42,7 +44,10 @@ export type FeedReviewListItem = {
   author: {
     id: string;
     display_name: string;
+    isContextPublic: boolean;
   };
+  /** 投稿時点のキャンプ状況（同行者・目的・滞在・移動） */
+  contextTags: string[];
   gear: {
     id: string;
     name: string;

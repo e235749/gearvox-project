@@ -28,7 +28,9 @@ export type GearReviewListItem = {
   author: {
     id: string;
     display_name: string;
+    isContextPublic: boolean;
   };
+  contextTags: string[];
   images: ReviewListImage[];
 };
 
