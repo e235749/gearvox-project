@@ -27,8 +27,8 @@ function labelOrNull(value: string | null, other: string | null): string | null 
 }
 
 /**
- * レビューの context_snapshot から、今回のキャンプ状況タグを取り出す。
- * 同行者、目的、滞在、移動の順。経験・頻度・ギアの好みは含めない。
+ * レビューの context_snapshot から、キャンプ状況タグを取り出す。
+ * 同行者、目的、経験年数、移動の順。頻度・滞在・ギアの好みは含めない。
  */
 export function contextTagsFromSnapshot(snapshot: unknown): string[] {
   if (!snapshot || typeof snapshot !== "object") {
@@ -55,9 +55,9 @@ export function contextTagsFromSnapshot(snapshot: unknown): string[] {
     tags.push(purpose);
   }
 
-  const stay = textOrNull(row.stay_duration);
-  if (stay) {
-    tags.push(stay);
+  const experience = textOrNull(row.experience_years);
+  if (experience) {
+    tags.push(experience);
   }
 
   const transport = labelOrNull(

@@ -46,7 +46,7 @@ export type FeedReviewListItem = {
     display_name: string;
     isContextPublic: boolean;
   };
-  /** 投稿時点のキャンプ状況（同行者・目的・滞在・移動） */
+  /** 投稿時点のキャンプ状況（同行者・目的・経験年数・移動） */
   contextTags: string[];
   gear: {
     id: string;
