@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { HOME_FEED_LIMIT } from "@/lib/reviews/constants";
+import { hidePrivateContextTags } from "@/lib/reviews/hide-private-context-tags";
 import {
   FEED_REVIEW_SELECT,
   mapFeedReviewRows,
@@ -34,5 +35,5 @@ export async function listFollowingReviews(
     return [];
   }
 
-  return mapFeedReviewRows((data ?? []) as FeedReviewRow[]);
+  return hidePrivateContextTags(mapFeedReviewRows((data ?? []) as FeedReviewRow[]));
 }

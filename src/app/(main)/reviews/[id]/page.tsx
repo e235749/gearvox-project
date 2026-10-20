@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ReviewContextTags } from "@/components/reviews/review-context-tags";
 import { ReviewOwnerActions } from "@/components/reviews/review-owner-actions";
 import { ReviewEngagement } from "@/components/reviews/review-engagement";
 import { StarRating } from "@/components/reviews/star-rating";
@@ -99,6 +100,12 @@ export default async function ReviewDetailPage({
             </div>
           ) : null}
         </div>
+        <ReviewContextTags
+          tags={review.contextTags}
+          isContextPublic={review.author.isContextPublic}
+          authorId={review.author.id}
+          currentUserId={user?.id ?? null}
+        />
       </header>
 
       <div className="rounded-lg border border-border bg-surface p-4 text-sm">

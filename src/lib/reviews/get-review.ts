@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { contextTagsFromSnapshot } from "@/lib/reviews/context-tags";
+import { hidePrivateContextTags } from "@/lib/reviews/hide-private-context-tags";
 
 import type { ReviewDetail } from "@/lib/reviews/types";
 
@@ -10,8 +12,13 @@ type ReviewRow = {
   body: string;
   rating: number;
   created_at: string;
+  context_snapshot: unknown;
   gears: { id: string; name: string; brand: string | null } | null;
-  users: { id: string; display_name: string } | null;
+  users: {
+    id: string;
+    display_name: string;
+    is_context_public: boolean;
+  } | null;
 };
 
 type ReviewImageRow = {
@@ -28,7 +35,7 @@ export async function getReviewById(
   const { data, error } = await supabase
     .from("reviews")
     .select(
-      "id, user_id, gear_id, title, body, rating, created_at, gears(id, name, brand), users(id, display_name)",
+      "id, user_id, gear_id, title, body, rating, created_at, context_snapshot, gears(id, name, brand), users(id, display_name, is_context_public)",
     )
     .eq("id", reviewId)
     .eq("is_deleted", false)
@@ -61,7 +68,7 @@ export async function getReviewById(
     return null;
   }
 
-  return {
+  const detail = {
     id: review.id,
     user_id: review.user_id,
     gear_id: review.gear_id,
@@ -77,7 +84,12 @@ export async function getReviewById(
     author: {
       id: author?.id ?? review.user_id,
       display_name: author?.display_name ?? "ユーザー",
+      isContextPublic: author?.is_context_public !== false,
     },
+    contextTags: contextTagsFromSnapshot(review.context_snapshot),
     images,
   };
+
+  const [visible] = await hidePrivateContextTags([detail]);
+  return visible ?? null;
 }

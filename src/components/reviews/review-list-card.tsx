@@ -1,10 +1,12 @@
 import Link from "next/link";
 
+import { ReviewContextTags } from "@/components/reviews/review-context-tags";
 import { ReviewEngagement } from "@/components/reviews/review-engagement";
 import { ReviewImageStrip } from "@/components/reviews/review-image-strip";
 import { StarRating } from "@/components/reviews/star-rating";
 import { SimilarityBadge } from "@/components/similarity/similarity-badge";
 import { formatGearLabel } from "@/lib/gears/format-gear-label";
+import { REVIEW_CONTEXT_TAG_PREVIEW_LIMIT } from "@/lib/reviews/context-tags";
 import { formatReviewDate } from "@/lib/reviews/format-review-label";
 import type { ReviewEngagementSummary } from "@/lib/reviews/engagement-types";
 import type { SimilarityDisplay } from "@/lib/similarity/types";
@@ -20,7 +22,9 @@ interface ReviewListCardProps {
     author: {
       id: string;
       display_name: string;
+      isContextPublic?: boolean;
     };
+    contextTags?: string[];
     images: ReviewListImage[];
   };
   gear?: {
@@ -85,6 +89,13 @@ export function ReviewListCard({
             ) : null}
             {formatReviewDate(review.created_at)}
           </p>
+          <ReviewContextTags
+            tags={review.contextTags ?? []}
+            isContextPublic={review.author.isContextPublic !== false}
+            authorId={review.author.id}
+            currentUserId={currentUserId}
+            limit={REVIEW_CONTEXT_TAG_PREVIEW_LIMIT}
+          />
           <Link
             href={`/reviews/${review.id}`}
             className="block space-y-1 transition-colors hover:text-accent"
